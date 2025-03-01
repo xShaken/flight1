@@ -17,10 +17,13 @@
 
         <!-- TABLE FOR AIRPORTS -->
         @if (Model == null || !Model.Any())
+
         {
             <div class="alert alert-warning text-center">No airports available.</div>
         }
+
         else
+
         {
             <table id="airportsTable" class="table table-striped">
                 <thead class="table-dark">
@@ -43,8 +46,15 @@
                             <td>@airport.Location</td>
                             <td>@airport.Code</td>
                             <td>
-                                <button class="btn btn-sm btn-warning"><i class="fas fa-edit"></i> Edit</button>
-                                <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i> Delete</button>
+                                <button class="btn btn-sm btn-warning edit-btn"
+                                        data-id="@airport.Id"
+                                        data-name="@airport.Name"
+                                        data-location="@airport.Location"
+                                        data-code="@airport.Code"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#editAirportModal">
+                                    <i class="fas fa-edit"></i> Edit
+                                </button>
                             </td>
                         </tr>
                     }
@@ -85,3 +95,49 @@
         </div>
     </div>
 </div>
+
+<!-- MODAL FOR EDITING AIRPORT -->
+<div class="modal fade" id="editAirportModal" tabindex="-1" aria-labelledby="editAirportModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editAirportModalLabel">Edit Airport</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="editAirportForm" asp-action="Edit" asp-controller="Airport" method="post">
+                <div class="modal-body">
+                    <input type="hidden" id="editAirportId" name="Id" />
+                    <div class="mb-3">
+                        <label class="form-label">Name</label>
+                        <input type="text" id="editAirportName" name="Name" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Location</label>
+                        <input type="text" id="editAirportLocation" name="Location" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Code</label>
+                        <input type="text" id="editAirportCode" name="Code" class="form-control" />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-warning">Update</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll(".edit-btn").forEach(button => {
+            button.addEventListener("click", function () {
+                document.getElementById("editAirportId").value = this.getAttribute("data-id");
+                document.getElementById("editAirportName").value = this.getAttribute("data-name");
+                document.getElementById("editAirportLocation").value = this.getAttribute("data-location");
+                document.getElementById("editAirportCode").value = this.getAttribute("data-code");
+            });
+        });
+    });
+</script>

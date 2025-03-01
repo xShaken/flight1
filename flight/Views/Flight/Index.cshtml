@@ -4,35 +4,192 @@
     ViewData["Title"] = "Flight List";
 }
 
-<h2>Flight List</h2>
+<div class="container mt-4">
+    <h2 class="text-center fw-bold">LIST OF FLIGHTS</h2>
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>Flight Number</th>
-            <th>Airline</th>
-            <th>Departure</th>
-            <th>Arrival</th>
-            <th>Departure Time</th>
-            <th>Arrival Time</th>
-            <th>Status</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var flight in Model)
+    <div class="d-flex justify-content-start mb-3">
+        <a class="btn btn-warning fw-bold px-4 py-2 rounded-pill" asp-action="Create">Add New</a>
+    </div>
 
-        {
-            <tr>
-                <td>@flight.FlightNumber</td>
-                <td>@flight.Airline?.Name</td>
-                <td>@flight.DepartureAirport?.Name</td>
-                <td>@flight.ArrivalAirport?.Name</td>
-                <td>@flight.DepartureTime.ToString("yyyy-MM-dd HH:mm")</td>
-                <td>@flight.ArrivalTime.ToString("yyyy-MM-dd HH:mm")</td>
-                <td>@flight.Status</td>
-            </tr>
-        }
-    </tbody>
-</table>
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered text-center align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>#</th>
+                            <th>Flight Number</th>
+                            <th>Airline</th>
+                            <th>Aircraft</th>
+                            <th>Departure</th>
+                            <th>Arrival</th>
+                            <th>Dep. Time</th>
+                            <th>Arr. Time</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Any())
 
-<a class="btn btn-primary" asp-action="Create">Add Flight</a>
+                        {
+
+                            int count = 1;
+                            @foreach (var flight in Model)
+
+                            {
+                                        <tr>
+                                            <td>@count</td>
+                                            <td>@flight.FlightNumber</td>
+                                            <td>@flight.Airline?.Name</td>
+                                            <td>@flight.AircraftCode</td>
+                                            <td>@flight.DepartureAirport?.Name</td>
+                                            <td>@flight.ArrivalAirport?.Name</td>
+                                            <td>@flight.DepartureDateTime.ToString("yyyy-MM-dd HH:mm")</td>
+                                            <td>@flight.EstimatedArrivalDateTime.ToString("yyyy-MM-dd HH:mm")</td>
+                                            <td>
+                                                <span class="badge @(flight.Status == "On Time" ? "bg-success" : flight.Status == "Delayed" ? "bg-warning text-dark" : "bg-danger")">
+                                            @flight.Status
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <button class="btn btn-warning btn-sm fw-bold px-3 rounded-pill edit-flight-btn"
+                                                    data-bs-toggle="modal" data-bs-target="#editFlightModal"
+                                                    data-id="@flight.Id"
+                                                    data-flightnumber="@flight.FlightNumber"
+                                                    data-aircraftcode="@flight.AircraftCode"
+                                                    data-airlineid="@flight.AirlineId"
+                                                    data-departureairportid="@flight.DepartureAirportId"
+                                                    data-arrivalairportid="@flight.ArrivalAirportId"
+                                                    data-departuredatetime="@flight.DepartureDateTime.ToString("yyyy-MM-ddTHH:mm")"
+                                                    data-arrivaldatetime="@flight.EstimatedArrivalDateTime.ToString("yyyy-MM-ddTHH:mm")"
+                                                    data-businessseats="@flight.BusinessSeatsAvailable"
+                                                    data-businessprice="@flight.BusinessClassPrice"
+                                                    data-economyseats="@flight.EconomySeatsAvailable"
+                                                    data-economyprice="@flight.EconomyClassPrice"
+                                                    data-firstclassseats="@flight.FirstClassSeatsAvailable"
+                                                    data-firstclassprice="@flight.FirstClassPrice"
+                                                    data-status="@flight.Status">
+                                                    <i class="fas fa-edit"></i> Edit
+                                                </button>
+                                            </td>
+                                        </tr>
+                                count++;
+
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Flight Modal -->
+<div class="modal fade" id="editFlightModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Flight</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form asp-action="Edit" asp-controller="Flight" method="post">
+                <div class="modal-body">
+                    <input type="hidden" id="editFlightId" name="Id" />
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label class="form-label">Flight Number</label>
+                            <input type="text" id="editFlightNumber" name="FlightNumber" class="form-control" required />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Aircraft Code</label>
+                            <input type="text" id="editAircraftCode" name="AircraftCode" class="form-control" required />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Airline</label>
+                            <select id="editAirlineId" name="AirlineId" class="form-select" asp-items="ViewBag.Airlines"></select>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Departure Airport</label>
+                            <select id="editDepartureAirportId" name="DepartureAirportId" class="form-select" asp-items="ViewBag.Airports"></select>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Arrival Airport</label>
+                            <select id="editArrivalAirportId" name="ArrivalAirportId" class="form-select" asp-items="ViewBag.Airports"></select>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Departure Time</label>
+                            <input type="datetime-local" id="editDepartureDateTime" name="DepartureDateTime" class="form-control" required />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Arrival Time</label>
+                            <input type="datetime-local" id="editArrivalDateTime" name="EstimatedArrivalDateTime" class="form-control" required />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Business Seats Available</label>
+                            <input type="number" id="editBusinessSeats" name="BusinessSeatsAvailable" class="form-control" required />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Business Class Price</label>
+                            <input type="number" id="editBusinessPrice" name="BusinessClassPrice" step="0.01" class="form-control" required />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Economy Seats Available</label>
+                            <input type="number" id="editEconomySeats" name="EconomySeatsAvailable" class="form-control" required />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Economy Class Price</label>
+                            <input type="number" id="editEconomyPrice" name="EconomyClassPrice" step="0.01" class="form-control" required />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">First Class Seats Available</label>
+                            <input type="number" id="editFirstClassSeats" name="FirstClassSeatsAvailable" class="form-control" required />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">First Class Price</label>
+                            <input type="number" id="editFirstClassPrice" name="FirstClassPrice" step="0.01" class="form-control" required />
+                        </div>
+
+                        <div class="col-md-12">
+                            <label class="form-label">Status</label>
+                            <select id="editStatus" name="Status" class="form-select">
+                                <option value="Scheduled">Scheduled</option>
+                                <option value="Delayed">Delayed</option>
+                                <option value="Cancelled">Cancelled</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success">Save Changes</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll(".edit-flight-btn").forEach(button => {
+        button.addEventListener("click", function () {
+            document.querySelectorAll("#editFlightModal [id^=edit]").forEach(input => {
+                input.value = this.getAttribute("data-" + input.id.replace("edit", "").toLowerCase());
+            });
+        });
+    });
+});
+</script>

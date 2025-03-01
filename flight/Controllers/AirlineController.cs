@@ -25,23 +25,12 @@ namespace flight.Controllers
         public IActionResult Index()
         {
             var airlines = _context.Airlines
-                .OrderByDescending(a => a.DateAdded) // Show newest airlines first
-                .AsNoTracking() // Ensures the latest data is fetched
+                .OrderByDescending(a => a.DateAdded)
+                .AsNoTracking()
                 .ToList();
 
-            if (!airlines.Any())
-            {
-                return View("~/Views/Home/Airlines.cshtml", new List<Airline>());
-            }
-
-            return View("~/Views/Home/Airlines.cshtml", airlines);
+            return View("Airlines", airlines);
         }
-
-
-
-
-
-
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -69,24 +58,60 @@ namespace flight.Controllers
                     airline.LogoPath = "/images/" + fileName;
                 }
 
-                if (airline.DateAdded == default)
-                {
-                    airline.DateAdded = DateTime.Now; // Only set if it's a new entry
-                }
+                airline.DateAdded = DateTime.Now;
 
                 _context.Airlines.Add(airline);
                 await _context.SaveChangesAsync();
 
-                // ✅ Correct RedirectToAction Syntax
-                return RedirectToAction("Airlines", "Home");
+                return RedirectToAction("Index");
             }
 
-            // If model state is invalid, return to the same page
-            return View(airline);
+            return View("Airlines", _context.Airlines.ToList());
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(Airline airline, IFormFile LogoFile)
+        {
+            if (ModelState.IsValid)
+            {
+                var existingAirline = await _context.Airlines.FindAsync(airline.Id);
+                if (existingAirline == null)
+                {
+                    return NotFound();
+                }
 
+                // If a new logo is uploaded, update it, otherwise retain the existing logo
+                if (LogoFile != null && LogoFile.Length > 0)
+                {
+                    string fileName = Path.GetFileName(LogoFile.FileName);
+                    string uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "images");
 
+                    if (!Directory.Exists(uploadsFolder))
+                    {
+                        Directory.CreateDirectory(uploadsFolder);
+                    }
 
+                    string filePath = Path.Combine(uploadsFolder, fileName);
+
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await LogoFile.CopyToAsync(stream);
+                    }
+
+                    existingAirline.LogoPath = "/images/" + fileName;
+                }
+
+                existingAirline.Name = airline.Name;
+                existingAirline.Status = airline.Status;
+
+                _context.Airlines.Update(existingAirline);
+                await _context.SaveChangesAsync();
+
+                return RedirectToAction("Index");
+            }
+
+            return View("Airlines", _context.Airlines.ToList());
+        }
     }
 }
