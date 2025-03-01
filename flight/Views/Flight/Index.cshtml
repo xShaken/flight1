@@ -1,0 +1,38 @@
+﻿@model IEnumerable<flight.Models.Flight>
+
+@{
+    ViewData["Title"] = "Flight List";
+}
+
+<h2>Flight List</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Flight Number</th>
+            <th>Airline</th>
+            <th>Departure</th>
+            <th>Arrival</th>
+            <th>Departure Time</th>
+            <th>Arrival Time</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var flight in Model)
+
+        {
+            <tr>
+                <td>@flight.FlightNumber</td>
+                <td>@flight.Airline?.Name</td>
+                <td>@flight.DepartureAirport?.Name</td>
+                <td>@flight.ArrivalAirport?.Name</td>
+                <td>@flight.DepartureTime.ToString("yyyy-MM-dd HH:mm")</td>
+                <td>@flight.ArrivalTime.ToString("yyyy-MM-dd HH:mm")</td>
+                <td>@flight.Status</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<a class="btn btn-primary" asp-action="Create">Add Flight</a>

@@ -1,0 +1,19 @@
+﻿body {
+}
+
+.card {
+    border-radius: 10px;
+    background: linear-gradient(135deg, #f8f9fa, #ffffff);
+}
+
+.form-label {
+    color: #08385b;
+}
+
+.btn {
+    transition: all 0.3s ease-in-out;
+}
+
+    .btn:hover {
+        background-color: #006f2a !important;
+    }

@@ -1,0 +1,296 @@
+html {
+  font-size: 14px;
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f9;
+    color: #333;
+}
+
+/* Navbar */
+.navbar {
+    background-color: #08385b !important; /* Dark blue */
+    padding: 15px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-brand {
+    font-weight: bold;
+    font-size: 24px;
+    color: #ffffff !important;
+    transition: color 0.3s ease;
+}
+
+    .navbar-brand:hover {
+        color: #ffcc00 !important; /* Yellow for hover effect */
+    }
+
+.navbar-nav .nav-link {
+    color: #ffffff !important;
+    transition: color 0.3s ease;
+    padding: 8px 15px;
+    border-radius: 5px;
+}
+
+    .navbar-nav .nav-link:hover {
+        color: #ffcc00 !important; /* Yellow for hover effect */
+        background-color: rgba(255, 255, 255, 0.1);
+    }
+
+/* Footer */
+.footer {
+    background-color: #08385b; /* Dark blue */
+    color: #ffffff;
+    text-align: center;
+    padding: 8px 0; /* Reduced padding */
+    margin-top: 20px; /* Adjusted margin */
+    box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1); /* Smaller shadow */
+    font-size: 12px; /* Smaller font size */
+    position: relative;
+    bottom: 0;
+    width: 100%;
+}
+
+    .footer a {
+        color: #ffcc00; /* Yellow for links */
+        text-decoration: none;
+        transition: color 0.3s ease;
+        font-size: 12px; /* Smaller font size for links */
+    }
+
+        .footer a:hover {
+            color: #ffffff; /* White for hover effect */
+        }
+
+/* Modern UI Enhancements */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.btn {
+    padding: 10px 20px;
+    border-radius: 25px;
+    font-size: 16px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background-color: #ffcc00; /* Yellow */
+    border: none;
+    color: #08385b; /* Dark blue */
+}
+
+    .btn-primary:hover {
+        background-color: #e6b800; /* Darker yellow */
+        transform: translateY(-2px);
+    }
+
+.btn-outline {
+    background-color: transparent;
+    border: 2px solid #ffcc00; /* Yellow */
+    color: #ffcc00; /* Yellow */
+}
+
+    .btn-outline:hover {
+        background-color: #ffcc00; /* Yellow */
+        color: #08385b; /* Dark blue */
+    }
+
+/* Additional Modern UI Elements */
+.card {
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin-bottom: 20px;
+    transition: transform 0.3s ease;
+}
+
+    .card:hover {
+        transform: translateY(-5px);
+    }
+
+.card-title {
+    font-size: 20px;
+    font-weight: bold;
+    color: #08385b; /* Dark blue */
+}
+
+.card-text {
+    color: #666;
+}
+
+
+/* General Styling */
+.home-container {
+    font-family: 'Poppins', sans-serif;
+}
+
+/* Hero Section */
+.hero-section {
+    background: linear-gradient(135deg, #ae0100, #08385b);
+    color: white;
+    text-align: center;
+    padding: 100px 20px;
+    border-radius: 15px;
+    margin: 40px auto;
+    max-width: 90%;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Subtle gradient overlay */
+.hero-section::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.2);
+    z-index: 1;
+}
+
+/* Hero Content */
+.hero-content {
+    position: relative;
+    z-index: 2;
+    max-width: 800px;
+    margin: auto;
+}
+
+.hero-content h1 {
+    font-size: 3.5rem;
+    font-weight: bold;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+}
+
+.brand-name {
+    color: #ffcc00;
+}
+
+.vista-text {
+    color: #ffffff;
+}
+
+.hero-content p {
+    font-size: 1.2rem;
+    margin-bottom: 25px;
+    opacity: 0.9;
+}
+
+/* Buttons */
+.hero-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.hero-buttons .btn {
+    padding: 14px 28px;
+    font-size: 1.2rem;
+    border-radius: 30px;
+    transition: all 0.3s ease-in-out;
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+
+/* Primary Button */
+.hero-buttons .btn-primary {
+    background-color: #ffcc00;
+    border: none;
+    color: #08385b;
+}
+
+.hero-buttons .btn-primary:hover {
+    background-color: #e6b800;
+    transform: translateY(-3px);
+}
+
+/* Outline Button */
+.hero-buttons .btn-outline-light {
+    border: 2px solid white;
+    color: white;
+}
+
+.hero-buttons .btn-outline-light:hover {
+    background-color: white;
+    color: #08385b;
+    transform: translateY(-3px);
+}
+
+
+
+/* Features Section */
+.features {
+    padding: 40px 20px; /* Adjusted padding */
+    background-color: #f4f4f9; /* Light background for contrast */
+    margin-bottom: 40px; /* Added gap after features section */
+}
+
+.feature-box {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    padding: 30px;
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    margin-bottom: 20px; /* Added margin for spacing */
+}
+
+    .feature-box:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    }
+
+.icon-container {
+    background: rgba(255, 255, 255, 0.2);
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 15px;
+}
+
+.feature-icon {
+    font-size: 2.5rem;
+    color: #ffcc00;
+}
+
+.feature-box h3 {
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+    font-weight: bold;
+}
+
+.feature-box p {
+    font-size: 1rem;
+    opacity: 0.9;
+}
+
+
+

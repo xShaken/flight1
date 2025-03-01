@@ -1,0 +1,101 @@
+﻿@model IEnumerable<flight.Models.Airline>
+
+@{
+    ViewData["Title"] = "Airlines";
+}
+
+<div class="container mt-5">
+    <div class="card shadow-lg p-4">
+        <h2 class="text-center text-uppercase fw-bold mb-4" style="color: #08385b;">List of Airlines</h2>
+
+        <div class="d-flex justify-content-between mb-3">
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addAirlineModal">
+                <i class="fas fa-plus"></i> Add New
+            </button>
+        </div>
+
+        @if (Model != null && Model.Any())
+        {
+            <table id="airlinesTable" class="table table-striped">
+                <thead class="table-dark">
+                    <tr>
+                        <th>#</th>
+                        <th>Date Added</th>
+                        <th>Logo</th>
+                        <th>Name</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var airline in Model)
+                    {
+                        <tr>
+                            <td>@airline.Id</td>
+                            <td>@(airline.DateAdded.ToString("yyyy-MM-dd HH:mm"))</td>
+                            <td>
+                                @if (!string.IsNullOrEmpty(airline.LogoPath))
+                                {
+                                    <img src="@airline.LogoPath" alt="Logo" style="width: 50px; height: 50px; border-radius: 50%;">
+                                }
+                                else
+                                {
+                                    <span>No Logo</span>
+                                }
+                            </td>
+                            <td>@airline.Name</td>
+                            <td>
+                                <span class="badge @(airline.Status == "Active" ? "bg-success" : "bg-danger")">
+                                    @airline.Status
+                                </span>
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-warning"><i class="fas fa-edit"></i> Edit</button>
+                                <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i> Delete</button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <div class="alert alert-warning text-center">No data available.</div>
+        }
+    </div>
+</div>
+
+<!-- MODAL FOR ADDING AIRLINE -->
+<div class="modal fade" id="addAirlineModal" tabindex="-1" aria-labelledby="addAirlineModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addAirlineModalLabel">Add New Airline</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form asp-action="Create" asp-controller="Airline" method="post" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Name</label>
+                        <input type="text" name="Name" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Status</label>
+                        <select name="Status" class="form-select">
+                            <option value="Active">Active</option>
+                            <option value="Inactive">Inactive</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Logo</label>
+                        <input type="file" name="LogoFile" class="form-control" />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success">Save</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,60 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="home-container">
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="hero-content">
+            <h1>Welcome to <span class="brand-name">Air<span class="vista-text">Vista</span></span></h1>
+            <p class="lead">Your gateway to seamless and hassle-free flight bookings.</p>
+            <div class="hero-buttons">
+                <a class="btn btn-primary btn-lg" asp-controller="Booking" asp-action="SearchFlights">Book a Flight</a>
+                <a class="btn btn-outline-light btn-lg" asp-controller="Home" asp-action="About">Learn More</a>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- Features Section -->
+    <section class="features">
+        <div class="container text-center">
+         
+       
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="feature-box">
+                        <div class="icon-container">
+                            <i class="fas fa-plane-departure feature-icon"></i>
+                        </div>
+                        <h3>Easy Booking</h3>
+                        <p>Find and book flights hassle-free with our intuitive platform.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-box">
+                        <div class="icon-container">
+                            <i class="fas fa-shield-alt feature-icon"></i>
+                        </div>
+                        <h3>Secure Payments</h3>
+                        <p>Enjoy a seamless and secure transaction process.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-box">
+                        <div class="icon-container">
+                            <i class="fas fa-headset feature-icon"></i>
+                        </div>
+                        <h3>Filter Search</h3>
+                        <p>Easily find flights with advanced filtering options.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+
+
+  
+</div>
