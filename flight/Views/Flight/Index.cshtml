@@ -186,10 +186,23 @@
 document.addEventListener("DOMContentLoaded", function () {
     document.querySelectorAll(".edit-flight-btn").forEach(button => {
         button.addEventListener("click", function () {
-            document.querySelectorAll("#editFlightModal [id^=edit]").forEach(input => {
-                input.value = this.getAttribute("data-" + input.id.replace("edit", "").toLowerCase());
-            });
+            document.querySelector("#editFlightId").value = this.getAttribute("data-id") || "";
+            document.querySelector("#editFlightNumber").value = this.getAttribute("data-flightnumber") || "";
+            document.querySelector("#editAircraftCode").value = this.getAttribute("data-aircraftcode") || "";
+            document.querySelector("#editAirlineId").value = this.getAttribute("data-airlineid") || "";
+            document.querySelector("#editDepartureAirportId").value = this.getAttribute("data-departureairportid") || "";
+            document.querySelector("#editArrivalAirportId").value = this.getAttribute("data-arrivalairportid") || "";
+            document.querySelector("#editDepartureDateTime").value = this.getAttribute("data-departuredatetime") || "";
+            document.querySelector("#editArrivalDateTime").value = this.getAttribute("data-arrivaldatetime") || "";
+            document.querySelector("#editBusinessSeats").value = this.getAttribute("data-businessseats") || "0";
+            document.querySelector("#editBusinessPrice").value = this.getAttribute("data-businessprice") || "0.00";
+            document.querySelector("#editEconomySeats").value = this.getAttribute("data-economyseats") || "0";
+            document.querySelector("#editEconomyPrice").value = this.getAttribute("data-economyprice") || "0.00";
+            document.querySelector("#editFirstClassSeats").value = this.getAttribute("data-firstclassseats") || "0";
+            document.querySelector("#editFirstClassPrice").value = this.getAttribute("data-firstclassprice") || "0.00";
+            document.querySelector("#editStatus").value = this.getAttribute("data-status") || "Scheduled";
         });
     });
 });
 </script>
+
