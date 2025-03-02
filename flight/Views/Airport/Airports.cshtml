@@ -4,87 +4,90 @@
     ViewData["Title"] = "Airports";
 }
 
-<div class="container mt-5">
-    <div class="card shadow-lg p-4">
-        <h2 class="text-center text-uppercase fw-bold mb-4" style="color: #08385b;">List of Airports</h2>
+<div class="container mt-4">
+    <h2 class="text-center fw-bold">LIST OF AIRPORTS</h2>
 
-        <!-- ADD NEW BUTTON -->
-        <div class="d-flex justify-content-between mb-3">
-            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addAirportModal">
-                <i class="fas fa-plus"></i> Add New
-            </button>
+    <!-- ADD NEW BUTTON -->
+    <div class="d-flex justify-content-start mb-3">
+        <button class="btn btn-warning fw-bold px-4 py-2 rounded-pill" data-bs-toggle="modal" data-bs-target="#addAirportModal">
+            <i class="fas fa-plus"></i> Add New
+        </button>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            @if (Model == null || !Model.Any())
+            {
+                <div class="alert alert-warning text-center">No airports available.</div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-bordered text-center align-middle">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>#</th>
+                                <th>Date Added</th>
+                                <th>Name</th>
+                                <th>Location</th>
+                                <th>Code</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var airport in Model)
+
+                            {
+                                <tr>
+                                    <td>@airport.Id</td>
+                                    <td>@(airport.DateAdded.ToString("yyyy-MM-dd HH:mm"))</td>
+                                    <td>@airport.Name</td>
+                                    <td>@airport.Location</td>
+                                    <td>@airport.Code</td>
+                                    <td>
+                                        <button class="btn btn-warning btn-sm fw-bold px-3 rounded-pill edit-btn"
+                                                data-id="@airport.Id"
+                                                data-name="@airport.Name"
+                                                data-location="@airport.Location"
+                                                data-code="@airport.Code"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#editAirportModal">
+                                            <i class="fas fa-edit"></i> Edit
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
         </div>
-
-        <!-- TABLE FOR AIRPORTS -->
-        @if (Model == null || !Model.Any())
-
-        {
-            <div class="alert alert-warning text-center">No airports available.</div>
-        }
-
-        else
-
-        {
-            <table id="airportsTable" class="table table-striped">
-                <thead class="table-dark">
-                    <tr>
-                        <th>#</th>
-                        <th>Date Added</th>
-                        <th>Name</th>
-                        <th>Location</th>
-                        <th>Code</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var airport in Model)
-                    {
-                        <tr>
-                            <td>@airport.Id</td>
-                            <td>@(airport.DateAdded.ToString("yyyy-MM-dd HH:mm"))</td>
-                            <td>@airport.Name</td>
-                            <td>@airport.Location</td>
-                            <td>@airport.Code</td>
-                            <td>
-                                <button class="btn btn-sm btn-warning edit-btn"
-                                        data-id="@airport.Id"
-                                        data-name="@airport.Name"
-                                        data-location="@airport.Location"
-                                        data-code="@airport.Code"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#editAirportModal">
-                                    <i class="fas fa-edit"></i> Edit
-                                </button>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        }
     </div>
 </div>
 
 <!-- MODAL FOR ADDING AIRPORT -->
-<div class="modal fade" id="addAirportModal" tabindex="-1" aria-labelledby="addAirportModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+<div class="modal fade" id="addAirportModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="addAirportModalLabel">Add New Airport</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <h5 class="modal-title">Add New Airport</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <form asp-action="Create" asp-controller="Airport" method="post">
                 <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label">Name</label>
-                        <input type="text" name="Name" class="form-control" required />
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Location</label>
-                        <input type="text" name="Location" class="form-control" required />
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Code</label>
-                        <input type="text" name="Code" class="form-control" placeholder="(Optional)" />
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label class="form-label">Name</label>
+                            <input type="text" name="Name" class="form-control" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Location</label>
+                            <input type="text" name="Location" class="form-control" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Code</label>
+                            <input type="text" name="Code" class="form-control" placeholder="(Optional)" />
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -97,31 +100,33 @@
 </div>
 
 <!-- MODAL FOR EDITING AIRPORT -->
-<div class="modal fade" id="editAirportModal" tabindex="-1" aria-labelledby="editAirportModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+<div class="modal fade" id="editAirportModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="editAirportModalLabel">Edit Airport</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <h5 class="modal-title">Edit Airport</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <form id="editAirportForm" asp-action="Edit" asp-controller="Airport" method="post">
                 <div class="modal-body">
                     <input type="hidden" id="editAirportId" name="Id" />
-                    <div class="mb-3">
-                        <label class="form-label">Name</label>
-                        <input type="text" id="editAirportName" name="Name" class="form-control" required />
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Location</label>
-                        <input type="text" id="editAirportLocation" name="Location" class="form-control" required />
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Code</label>
-                        <input type="text" id="editAirportCode" name="Code" class="form-control" />
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label class="form-label">Name</label>
+                            <input type="text" id="editAirportName" name="Name" class="form-control" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Location</label>
+                            <input type="text" id="editAirportLocation" name="Location" class="form-control" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Code</label>
+                            <input type="text" id="editAirportCode" name="Code" class="form-control" />
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="submit" class="btn btn-warning">Update</button>
+                    <button type="submit" class="btn btn-success">Update</button>
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 </div>
             </form>

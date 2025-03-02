@@ -34,7 +34,7 @@ namespace flight.Controllers
            var result = await signInManager.PasswordSignInAsync(model.Email,model.Password,model.RememberMe,lockoutOnFailure:false);
             if (result.Succeeded)
             {
-                return RedirectToAction("Index", "Home");
+                return RedirectToAction("Dashboard", "Home");
             }
             ModelState.AddModelError(string.Empty, "Invalid Login Attempt");
             return View(model);

@@ -25,6 +25,7 @@
                             <th>Arrival</th>
                             <th>Dep. Time</th>
                             <th>Arr. Time</th>
+                            <th>Date Added</th>
                             <th>Status</th>
                             <th>Action</th>
                         </tr>
@@ -38,42 +39,43 @@
                             @foreach (var flight in Model)
 
                             {
-                                        <tr>
-                                            <td>@count</td>
-                                            <td>@flight.FlightNumber</td>
-                                            <td>@flight.Airline?.Name</td>
-                                            <td>@flight.AircraftCode</td>
-                                            <td>@flight.DepartureAirport?.Name</td>
-                                            <td>@flight.ArrivalAirport?.Name</td>
-                                            <td>@flight.DepartureDateTime.ToString("yyyy-MM-dd HH:mm")</td>
-                                            <td>@flight.EstimatedArrivalDateTime.ToString("yyyy-MM-dd HH:mm")</td>
-                                            <td>
-                                                <span class="badge @(flight.Status == "On Time" ? "bg-success" : flight.Status == "Delayed" ? "bg-warning text-dark" : "bg-danger")">
+                                <tr>
+                                    <td>@count</td>
+                                    <td>@flight.FlightNumber</td>
+                                    <td>@flight.Airline?.Name</td>
+                                    <td>@flight.AircraftCode</td>
+                                    <td>@flight.DepartureAirport?.Name</td>
+                                    <td>@flight.ArrivalAirport?.Name</td>
+                                    <td>@flight.DepartureDateTime.ToString("yyyy-MM-dd HH:mm")</td>
+                                    <td>@flight.EstimatedArrivalDateTime.ToString("yyyy-MM-dd HH:mm")</td>
+                                    <td>@flight.DateAdded.ToString("yyyy-MM-dd HH:mm")</td>
+                                    <td>
+                                        <span class="badge @(flight.Status == "On Time" ? "bg-success" : flight.Status == "Delayed" ? "bg-warning text-dark" : "bg-danger")">
                                             @flight.Status
-                                                </span>
-                                            </td>
-                                            <td>
-                                                <button class="btn btn-warning btn-sm fw-bold px-3 rounded-pill edit-flight-btn"
-                                                    data-bs-toggle="modal" data-bs-target="#editFlightModal"
-                                                    data-id="@flight.Id"
-                                                    data-flightnumber="@flight.FlightNumber"
-                                                    data-aircraftcode="@flight.AircraftCode"
-                                                    data-airlineid="@flight.AirlineId"
-                                                    data-departureairportid="@flight.DepartureAirportId"
-                                                    data-arrivalairportid="@flight.ArrivalAirportId"
-                                                    data-departuredatetime="@flight.DepartureDateTime.ToString("yyyy-MM-ddTHH:mm")"
-                                                    data-arrivaldatetime="@flight.EstimatedArrivalDateTime.ToString("yyyy-MM-ddTHH:mm")"
-                                                    data-businessseats="@flight.BusinessSeatsAvailable"
-                                                    data-businessprice="@flight.BusinessClassPrice"
-                                                    data-economyseats="@flight.EconomySeatsAvailable"
-                                                    data-economyprice="@flight.EconomyClassPrice"
-                                                    data-firstclassseats="@flight.FirstClassSeatsAvailable"
-                                                    data-firstclassprice="@flight.FirstClassPrice"
-                                                    data-status="@flight.Status">
-                                                    <i class="fas fa-edit"></i> Edit
-                                                </button>
-                                            </td>
-                                        </tr>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-warning btn-sm fw-bold px-3 rounded-pill edit-flight-btn"
+                                                data-bs-toggle="modal" data-bs-target="#editFlightModal"
+                                                data-id="@flight.Id"
+                                                data-flightnumber="@flight.FlightNumber"
+                                                data-aircraftcode="@flight.AircraftCode"
+                                                data-airlineid="@flight.AirlineId"
+                                                data-departureairportid="@flight.DepartureAirportId"
+                                                data-arrivalairportid="@flight.ArrivalAirportId"
+                                                data-departuredatetime="@flight.DepartureDateTime.ToString("yyyy-MM-ddTHH:mm")"
+                                                data-arrivaldatetime="@flight.EstimatedArrivalDateTime.ToString("yyyy-MM-ddTHH:mm")"
+                                                data-businessseats="@flight.BusinessSeatsAvailable"
+                                                data-businessprice="@flight.BusinessClassPrice"
+                                                data-economyseats="@flight.EconomySeatsAvailable"
+                                                data-economyprice="@flight.EconomyClassPrice"
+                                                data-firstclassseats="@flight.FirstClassSeatsAvailable"
+                                                data-firstclassprice="@flight.FirstClassPrice"
+                                                data-status="@flight.Status">
+                                            <i class="fas fa-edit"></i> Edit
+                                        </button>
+                                    </td>
+                                </tr>
                                 count++;
 
                             }
@@ -183,26 +185,25 @@
 </div>
 
 <script>
-document.addEventListener("DOMContentLoaded", function () {
-    document.querySelectorAll(".edit-flight-btn").forEach(button => {
-        button.addEventListener("click", function () {
-            document.querySelector("#editFlightId").value = this.getAttribute("data-id") || "";
-            document.querySelector("#editFlightNumber").value = this.getAttribute("data-flightnumber") || "";
-            document.querySelector("#editAircraftCode").value = this.getAttribute("data-aircraftcode") || "";
-            document.querySelector("#editAirlineId").value = this.getAttribute("data-airlineid") || "";
-            document.querySelector("#editDepartureAirportId").value = this.getAttribute("data-departureairportid") || "";
-            document.querySelector("#editArrivalAirportId").value = this.getAttribute("data-arrivalairportid") || "";
-            document.querySelector("#editDepartureDateTime").value = this.getAttribute("data-departuredatetime") || "";
-            document.querySelector("#editArrivalDateTime").value = this.getAttribute("data-arrivaldatetime") || "";
-            document.querySelector("#editBusinessSeats").value = this.getAttribute("data-businessseats") || "0";
-            document.querySelector("#editBusinessPrice").value = this.getAttribute("data-businessprice") || "0.00";
-            document.querySelector("#editEconomySeats").value = this.getAttribute("data-economyseats") || "0";
-            document.querySelector("#editEconomyPrice").value = this.getAttribute("data-economyprice") || "0.00";
-            document.querySelector("#editFirstClassSeats").value = this.getAttribute("data-firstclassseats") || "0";
-            document.querySelector("#editFirstClassPrice").value = this.getAttribute("data-firstclassprice") || "0.00";
-            document.querySelector("#editStatus").value = this.getAttribute("data-status") || "Scheduled";
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll(".edit-flight-btn").forEach(button => {
+            button.addEventListener("click", function () {
+                document.querySelector("#editFlightId").value = this.getAttribute("data-id") || "";
+                document.querySelector("#editFlightNumber").value = this.getAttribute("data-flightnumber") || "";
+                document.querySelector("#editAircraftCode").value = this.getAttribute("data-aircraftcode") || "";
+                document.querySelector("#editAirlineId").value = this.getAttribute("data-airlineid") || "";
+                document.querySelector("#editDepartureAirportId").value = this.getAttribute("data-departureairportid") || "";
+                document.querySelector("#editArrivalAirportId").value = this.getAttribute("data-arrivalairportid") || "";
+                document.querySelector("#editDepartureDateTime").value = this.getAttribute("data-departuredatetime") || "";
+                document.querySelector("#editArrivalDateTime").value = this.getAttribute("data-arrivaldatetime") || "";
+                document.querySelector("#editBusinessSeats").value = this.getAttribute("data-businessseats") || "0";
+                document.querySelector("#editBusinessPrice").value = this.getAttribute("data-businessprice") || "0.00";
+                document.querySelector("#editEconomySeats").value = this.getAttribute("data-economyseats") || "0";
+                document.querySelector("#editEconomyPrice").value = this.getAttribute("data-economyprice") || "0.00";
+                document.querySelector("#editFirstClassSeats").value = this.getAttribute("data-firstclassseats") || "0";
+                document.querySelector("#editFirstClassPrice").value = this.getAttribute("data-firstclassprice") || "0.00";
+                document.querySelector("#editStatus").value = this.getAttribute("data-status") || "Scheduled";
+            });
         });
     });
-});
 </script>
-

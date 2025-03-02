@@ -39,12 +39,84 @@ namespace flight.Controllers
             return View();
         }
 
-        public IActionResult Dashboard()
+        public async Task<IActionResult> Dashboard()
         {
-            return View();
+            var flights = await _context.Flights
+                .Include(f => f.Airline)
+                .Include(f => f.DepartureAirport)
+                .Include(f => f.ArrivalAirport)
+                .ToListAsync();
+
+            var airlinesCount = await _context.Airlines.CountAsync(); // Get total airlines
+
+            ViewBag.AirlinesCount = airlinesCount; // Pass to the view
+
+            return View(flights);
         }
 
-       
+        [HttpPost]
+        public async Task<IActionResult> UpdateStatus(int id, int? delayMinutes, string status)
+        {
+            var flight = await _context.Flights.FindAsync(id);
+            if (flight == null)
+            {
+                return NotFound();
+            }
+
+            if (status == "Delayed" && delayMinutes.HasValue)
+            {
+                // Update both departure and arrival times if delayed
+                flight.DepartureDateTime = flight.DepartureDateTime.AddMinutes(delayMinutes.Value);
+                flight.EstimatedArrivalDateTime = flight.EstimatedArrivalDateTime.AddMinutes(delayMinutes.Value);
+            }
+            else if (status == "Departed")
+            {
+                // Update DepartureDateTime to the current time when marked as Departed
+                flight.DepartureDateTime = DateTime.Now;
+            }
+
+            flight.Status = status;
+            _context.Update(flight);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("Dashboard");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ResolveIssue(int id)
+        {
+            var flight = await _context.Flights.FindAsync(id);
+            if (flight == null)
+            {
+                return NotFound();
+            }
+
+            flight.Status = "Scheduled";
+            _context.Update(flight);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("Dashboard");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> MarkAsArrived(int id)
+        {
+            var flight = await _context.Flights.FindAsync(id);
+            if (flight == null)
+            {
+                return NotFound();
+            }
+
+            // Update EstimatedArrivalDateTime to the current time when marked as Arrived
+            flight.EstimatedArrivalDateTime = DateTime.Now;
+            flight.Status = "Arrived";
+            _context.Update(flight);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("Dashboard");
+        }
+
+
 
         public IActionResult Flights()
         {
@@ -62,6 +134,7 @@ namespace flight.Controllers
             var airports = _context.Airports.ToList();
             return View(airports);
         }
+
 
 
         [Authorize(Roles = "User")]
