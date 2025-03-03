@@ -1,7 +1,316 @@
-﻿@{
-    ViewData["Title"] = "Dashboard";
+﻿@model IEnumerable<flight.Models.Flight>
 
+
+@{
+    ViewData["Title"] = "Dashboard";
 }
-<div class="text-center">
-    <h1 class="display-4">Welcome to Dashboard</h1>
+
+<div class="container mt-4">
+    <!-- Cards for Statistics -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-4">
+            <div class="card bg-primary text-white shadow">
+                <div class="card-body">
+                    <h5 class="card-title">Total Flights</h5>
+                    <p class="card-text display-6">@(Model?.Count() ?? 0)</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-success text-white shadow">
+                <div class="card-body">
+                    <h5 class="card-title">Available Airlines</h5>
+                    <p class="card-text display-6">@ViewBag.AirlinesCount</p>
+
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-info text-white shadow">
+                <div class="card-body">
+                    <h5 class="card-title">Scheduled Flights Today</h5>
+                    <p class="card-text display-6">@(Model?.Count(f => f.Status == "Scheduled" && f.DepartureDateTime.Date == DateTime.Today) ?? 0)</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Today's Scheduled Flights with Modal -->
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <h2 class="text-center fw-bold mb-4">Today's Scheduled Flights</h2>
+            <div class="table-responsive">
+                <table class="table table-hover table-bordered text-center align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>#</th>
+                            <th>Flight Number</th>
+                            <th>Airline</th>
+                            <th>Departure</th>
+                            <th>Arrival</th>
+                            <th>Dep. Time</th>
+                            <th>Arr. Time</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model != null && Model.Any(f => f.Status == "Scheduled" && f.DepartureDateTime.Date == DateTime.Today))
+
+                        {
+
+                            int count = 1;
+                            @foreach (var flight in Model.Where(f => f.Status == "Scheduled" && f.DepartureDateTime.Date == DateTime.Today))
+
+                            {
+                                <tr>
+                                    <td>@count</td>
+                                    <td>@flight.FlightNumber</td>
+                                    <td>@flight.Airline?.Name</td>
+                                    <td>@flight.DepartureAirport?.Name</td>
+                                    <td>@flight.ArrivalAirport?.Name</td>
+                                    <td>@flight.DepartureDateTime.ToString("yyyy-MM-dd HH:mm")</td>
+                                    <td>@flight.EstimatedArrivalDateTime.ToString("yyyy-MM-dd HH:mm")</td>
+                                    <td>
+                                        <span class="badge bg-success">@flight.Status</span>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#flightModal-@flight.Id">Actions</button>
+                                    </td>
+                                </tr>
+                                count++;
+
+                            }
+                        }
+
+                        else
+
+                        {
+                            <tr>
+                                <td colspan="9" class="text-muted">No scheduled flights for today.</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals for Today's Scheduled Flights -->
+    @if (Model != null && Model.Any(f => f.Status == "Scheduled" && f.DepartureDateTime.Date == DateTime.Today))
+
+    {
+        @foreach (var flight in Model.Where(f => f.Status == "Scheduled" && f.DepartureDateTime.Date == DateTime.Today))
+
+        {
+            <div class="modal fade" id="flightModal-@flight.Id" tabindex="-1" aria-labelledby="flightModalLabel-@flight.Id" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="flightModalLabel-@flight.Id">Update Flight Status</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form asp-action="UpdateStatus" method="post">
+                                <input type="hidden" name="id" value="@flight.Id" />
+                                <div class="mb-3">
+                                    <label for="delayMinutes-@flight.Id" class="form-label">Delay (minutes)</label>
+                                    <input type="number" id="delayMinutes-@flight.Id" name="delayMinutes" class="form-control" placeholder="Enter delay in minutes" />
+                                </div>
+                                <div class="mb-3">
+                                    <button type="submit" name="status" value="Delayed" class="btn btn-warning">Delay</button>
+                                    <button type="submit" name="status" value="Departed" class="btn btn-info">Departed</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+
+    <!-- Today's Flight Issues -->
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <h2 class="text-center fw-bold mb-4">Today's Flight Issues</h2>
+            <div class="table-responsive">
+                <table class="table table-hover table-bordered text-center align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>#</th>
+                            <th>Flight Number</th>
+                            <th>Airline</th>
+                            <th>Departure</th>
+                            <th>Arrival</th>
+                            <th>Dep. Time</th>
+                            <th>Arr. Time</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model != null && Model.Any(f => (f.Status == "Delayed" || f.Status == "Cancelled") && f.DepartureDateTime.Date == DateTime.Today))
+
+                        {
+
+                            int count = 1;
+                            @foreach (var flight in Model.Where(f => (f.Status == "Delayed" || f.Status == "Cancelled") && f.DepartureDateTime.Date == DateTime.Today))
+
+                            {
+                                <tr>
+                                    <td>@count</td>
+                                    <td>@flight.FlightNumber</td>
+                                    <td>@flight.Airline?.Name</td>
+                                    <td>@flight.DepartureAirport?.Name</td>
+                                    <td>@flight.ArrivalAirport?.Name</td>
+                                    <td>@flight.DepartureDateTime.ToString("yyyy-MM-dd HH:mm")</td>
+                                    <td>@flight.EstimatedArrivalDateTime.ToString("yyyy-MM-dd HH:mm")</td>
+                                    <td>
+                                        <span class="badge @(flight.Status == "Delayed" ? "bg-warning" : "bg-danger")">@flight.Status</span>
+                                    </td>
+                                    <td>
+                                        <form asp-action="ResolveIssue" method="post" class="d-inline">
+                                            <input type="hidden" name="id" value="@flight.Id" />
+                                            <button type="submit" class="btn btn-success btn-sm">Resolve</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                count++;
+
+                            }
+                        }
+
+                        else
+
+                        {
+                            <tr>
+                                <td colspan="9" class="text-muted">No flight issues for today.</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Flights Departed Today -->
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <h2 class="text-center fw-bold mb-4">Flights Departed Today</h2>
+            <div class="table-responsive">
+                <table class="table table-hover table-bordered text-center align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>#</th>
+                            <th>Flight Number</th>
+                            <th>Airline</th>
+                            <th>Departure</th>
+                            <th>Arrival</th>
+                            <th>Dep. Time</th>
+                            <th>Arr. Time</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model != null && Model.Any(f => f.Status == "Departed" && f.DepartureDateTime.Date == DateTime.Today))
+
+                        {
+
+                            int count = 1;
+                            @foreach (var flight in Model.Where(f => f.Status == "Departed" && f.DepartureDateTime.Date == DateTime.Today))
+
+                            {
+                                <tr>
+                                    <td>@count</td>
+                                    <td>@flight.FlightNumber</td>
+                                    <td>@flight.Airline?.Name</td>
+                                    <td>@flight.DepartureAirport?.Name</td>
+                                    <td>@flight.ArrivalAirport?.Name</td>
+                                    <td>@flight.DepartureDateTime.ToString("yyyy-MM-dd HH:mm")</td>
+                                    <td>@flight.EstimatedArrivalDateTime.ToString("yyyy-MM-dd HH:mm")</td>
+                                    <td>
+                                        <span class="badge bg-info">@flight.Status</span>
+                                    </td>
+                                    <td>
+                                        <form asp-action="MarkAsArrived" method="post" class="d-inline">
+                                            <input type="hidden" name="id" value="@flight.Id" />
+                                            <button type="submit" class="btn btn-success btn-sm">Arrived</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                count++;
+
+                            }
+                        }
+
+                        else
+
+                        {
+                            <tr>
+                                <td colspan="9" class="text-muted">No departed flights for today.</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Flights Arrived Today -->
+    <div class="card shadow">
+        <div class="card-body">
+            <h2 class="text-center fw-bold mb-4">Flights Arrived Today</h2>
+            <div class="table-responsive">
+                <table class="table table-hover table-bordered text-center align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>#</th>
+                            <th>Flight Number</th>
+                            <th>Airline</th>
+                            <th>Departure</th>
+                            <th>Arrival</th>
+                            <th>Dep. Time</th>
+                            <th>Arr. Time</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model != null && Model.Any(f => f.Status == "Arrived" && f.DepartureDateTime.Date == DateTime.Today))
+
+                        {
+
+                            int count = 1;
+                            @foreach (var flight in Model.Where(f => f.Status == "Arrived" && f.DepartureDateTime.Date == DateTime.Today))
+
+                            {
+                                <tr>
+                                    <td>@count</td>
+                                    <td>@flight.FlightNumber</td>
+                                    <td>@flight.Airline?.Name</td>
+                                    <td>@flight.DepartureAirport?.Name</td>
+                                    <td>@flight.ArrivalAirport?.Name</td>
+                                    <td>@flight.DepartureDateTime.ToString("yyyy-MM-dd HH:mm")</td>
+                                    <td>@flight.EstimatedArrivalDateTime.ToString("yyyy-MM-dd HH:mm")</td>
+                                    <td>
+                                        <span class="badge bg-success">@flight.Status</span>
+                                    </td>
+                                </tr>
+                                count++;
+
+                            }
+                        }
+
+                        else
+
+                        {
+                            <tr>
+                                <td colspan="8" class="text-muted">No arrived flights for today.</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 </div>

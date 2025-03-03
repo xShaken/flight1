@@ -4,128 +4,88 @@
     ViewData["Title"] = "Airlines";
 }
 
-<div class="container mt-5">
-    <div class="card shadow-lg p-4">
-        <h2 class="text-center text-uppercase fw-bold mb-4" style="color: #08385b;">List of Airlines</h2>
+<div class="container mt-4">
+    <h2 class="text-center fw-bold">LIST OF AIRLINES</h2>
 
-        <div class="d-flex justify-content-between mb-3">
-            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addAirlineModal">
-                <i class="fas fa-plus"></i> Add New
-            </button>
-        </div>
+    <div class="d-flex justify-content-start mb-3">
+        <button class="btn btn-warning fw-bold px-4 py-2 rounded-pill" data-bs-toggle="modal" data-bs-target="#addAirlineModal">
+            <i class="fas fa-plus"></i> Add New
+        </button>
+    </div>
 
-        @if (Model != null && Model.Any())
-
-        {
-            <table id="airlinesTable" class="table table-striped">
-                <thead class="table-dark">
-                    <tr>
-                        <th>#</th>
-                        <th>Date Added</th>
-                        <th>Logo</th>
-                        <th>Name</th>
-                        <th>Status</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var airline in Model)
-                    {
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered text-center align-middle">
+                    <thead class="table-dark">
                         <tr>
-                            <td>@airline.Id</td>
-                            <td>@(airline.DateAdded.ToString("yyyy-MM-dd HH:mm"))</td>
-                            <td>
-                                @if (!string.IsNullOrEmpty(airline.LogoPath))
-
-                                {
-                                    <img src="@airline.LogoPath" alt="Logo" style="width: 50px; height: 50px; border-radius: 50%;">
-                                }
-
-                                else
-
-                                {
-                                    <span>No Logo</span>
-                                }
-                            </td>
-                            <td>@airline.Name</td>
-                            <td>
-                                <span class="badge @(airline.Status == "Active" ? "bg-success" : "bg-danger")">
-                                    @airline.Status
-                                </span>
-                            </td>
-                            <td>
-                                <button class="btn btn-sm btn-warning edit-airline-btn"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#editAirlineModal"
-                                        data-id="@airline.Id"
-                                        data-name="@airline.Name"
-                                        data-status="@airline.Status"
-                                        data-logo="@airline.LogoPath">
-                                    <i class="fas fa-edit"></i> Edit
-                                </button>
-                            </td>
+                            <th>#</th>
+                            <th>Date Added</th>
+                            <th>Logo</th>
+                            <th>Name</th>
+                            <th>Status</th>
+                            <th>Action</th>
                         </tr>
-                    }
-                </tbody>
-            </table>
-        }
+                    </thead>
+                    <tbody>
+                        @foreach (var airline in Model)
 
-        else
+                        {
+                            <tr>
+                                <td>@airline.Id</td>
+                                <td>@(airline.DateAdded.ToString("yyyy-MM-dd HH:mm"))</td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(airline.LogoPath))
 
-        {
-            <div class="alert alert-warning text-center">No data available.</div>
-        }
-    </div>
-</div>
+                                    {
+                                        <img src="@airline.LogoPath" alt="Logo" class="rounded-circle" style="width: 50px; height: 50px;">
+                                    }
 
-<!-- ADD AIRLINE MODAL -->
-<div class="modal fade" id="addAirlineModal" tabindex="-1" aria-labelledby="addAirlineModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Add Airline</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    else
+
+                                    {
+                                        <span>No Logo</span>
+                                    }
+                                </td>
+                                <td>@airline.Name</td>
+                                <td>
+                                    <span class="badge @(airline.Status == "Active" ? "bg-success" : "bg-danger")">
+                                        @airline.Status
+                                    </span>
+                                </td>
+                                <td>
+                                    <button class="btn btn-warning btn-sm fw-bold px-3 rounded-pill edit-airline-btn"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#editAirlineModal"
+                                            data-id="@airline.Id"
+                                            data-name="@airline.Name"
+                                            data-status="@airline.Status"
+                                            data-logo="@airline.LogoPath">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
             </div>
-            <form asp-action="Create" asp-controller="Airline" method="post" enctype="multipart/form-data">
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label">Name</label>
-                        <input type="text" name="Name" class="form-control" required />
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Status</label>
-                        <select name="Status" class="form-select">
-                            <option value="Active">Active</option>
-                            <option value="Inactive">Inactive</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Logo</label>
-                        <input type="file" name="LogoFile" class="form-control" />
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-success">Save</button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                </div>
-            </form>
         </div>
     </div>
 </div>
-
-
 
 <!-- EDIT AIRLINE MODAL -->
-<div class="modal fade" id="editAirlineModal" tabindex="-1" aria-labelledby="editAirlineModalLabel" aria-hidden="true">
+<div class="modal fade" id="editAirlineModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Edit Airline</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <form id="editAirlineForm" asp-action="Edit" asp-controller="Airline" method="post" enctype="multipart/form-data">
                 <div class="modal-body">
                     <input type="hidden" name="Id" id="editAirlineId" />
+                    <input type="hidden" name="ExistingLogoPath" id="editExistingLogoPath" />
+
                     <div class="mb-3">
                         <label class="form-label">Name</label>
                         <input type="text" name="Name" id="editAirlineName" class="form-control" required />
@@ -143,7 +103,7 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Current Logo</label><br />
-                        <img id="editAirlineLogo" src="" alt="Logo" style="width: 50px; height: 50px; border-radius: 50%;" />
+                        <img id="editAirlineLogo" src="" alt="Logo" class="rounded-circle" style="width: 50px; height: 50px;">
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -156,17 +116,13 @@
 </div>
 
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const editButtons = document.querySelectorAll(".edit-airline-btn");
-        const editModal = new bootstrap.Modal(document.getElementById("editAirlineModal"));
-
-        editButtons.forEach(button => {
-            button.addEventListener("click", function () {
-                document.getElementById("editAirlineId").value = this.dataset.id;
-                document.getElementById("editAirlineName").value = this.dataset.name;
-                document.getElementById("editAirlineStatus").value = this.dataset.status;
-                document.getElementById("editAirlineLogo").src = this.dataset.logo || "";
-            });
+    document.querySelectorAll(".edit-airline-btn").forEach(button => {
+        button.addEventListener("click", function () {
+            document.getElementById("editAirlineId").value = this.dataset.id;
+            document.getElementById("editAirlineName").value = this.dataset.name;
+            document.getElementById("editAirlineStatus").value = this.dataset.status;
+            document.getElementById("editExistingLogoPath").value = this.dataset.logo || "";
+            document.getElementById("editAirlineLogo").src = this.dataset.logo || "";
         });
     });
 </script>

@@ -2,6 +2,7 @@
 using flight.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace flight.Controllers
 {
@@ -31,19 +32,33 @@ namespace flight.Controllers
             {
                 return View(model);
             }
-           var result = await signInManager.PasswordSignInAsync(model.Email,model.Password,model.RememberMe,lockoutOnFailure:false);
+
+            var result = await signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, false);
             if (result.Succeeded)
             {
-                return RedirectToAction("Index", "Home");
+                var user = await userManager.FindByEmailAsync(model.Email);
+
+                if (user != null) // Checking if the user exists
+                {
+                    if (await userManager.IsInRoleAsync(user, "Admin"))
+                    {
+                        return RedirectToAction("Admin", "Home"); // Redirect Admin to Admin View
+                    }
+
+                    //redirect to the homecontroller
+
+                    else if (await userManager.IsInRoleAsync(user, "User"))
+                    {
+                        return RedirectToAction("User", "Home"); // ✅ This will redirect users to Views/Users/Index.cshtml
+                    }
+
+
+                }
             }
-            ModelState.AddModelError(string.Empty, "Invalid Login Attempt");
+            ModelState.AddModelError("", "Invalid Login Attempt");
             return View(model);
         }
-        [HttpGet]
-        public IActionResult Register()
-        {
-            return View();
-        }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Register(RegisterViewModel model)
@@ -146,8 +161,10 @@ namespace flight.Controllers
                 }
               return View(model);
             }
-            
-        }
+
+           }
+
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()

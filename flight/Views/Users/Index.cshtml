@@ -1,0 +1,100 @@
+﻿@{
+    ViewData["Title"] = "User";
+    Layout = "~/Views/Shared/_UserLayout.cshtml";
+}
+<!-- ***** Welcome Area Start ***** -->
+<div class="welcome-area" id="welcome">
+
+    <!-- ***** Header Text Start ***** -->
+    <div class="header-text">
+        <div class="container">
+            <div class="row">
+                <div class="left-text col-lg-6 col-md-12 col-sm-12 col-xs-12"
+                     data-scroll-reveal="enter left move 30px over 0.6s after 0.4s">
+                    <h1>Book Your Next <em>Flight</em> With Ease</h1>
+                    <p>
+                        Experience hassle-free flight bookings with AirVista’s user-friendly platform. Compare top airlines and manage your reservations effortlessly.
+                        Whether you're traveling for business or leisure, we ensure a smooth booking experience tailored to your needs.
+                    </p>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Flight Search Form -->
+    <div class="flight-search-container">
+        <div class="flight-header">
+            <span class="flight-icon">✈️ Flight</span>
+            <span class="trip-options">
+                <select id="tripType">
+                    <option value="round-trip">Round-trip</option>
+                    <option value="one-way">One-way</option>
+                </select>
+            </span>
+        </div>
+        <div class="flight-form">
+            <div class="form-group">
+                <label>From</label>
+                <select class="form-control" id="from" name="from">
+                    <option value="">Select Departure</option>
+                    @foreach (var airport in ViewBag.DepartureAirports)
+                    {
+                        <option value="@airport.Value">@airport.Text</option>
+                    }
+                </select>
+            </div>
+            <div class="form-group">
+                <label>To</label>
+                <select class="form-control" id="to" name="to">
+                    <option value="">Select Destination</option>
+                    @foreach (var airport in ViewBag.ArrivalAirports)
+                    {
+                        <option value="@airport.Value">@airport.Text</option>
+                    }
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Depart</label>
+                <input type="date" class="form-control" name="depart">
+            </div>
+            <div class="form-group">
+                <label>Return</label>
+                <input type="date" class="form-control" name="return">
+            </div>
+            <button class="btn btn-primary search-btn">Search Flights</button>
+        </div>
+    </div>
+
+    <!-- End Flight Search Form -->
+
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+    $(document).ready(function () {
+        $(".search-btn").click(function (e) {  // ✅ Corrected button selector
+            e.preventDefault();  // Prevents page reload
+
+            var from = $("#from").val();
+            var to = $("#to").val();
+
+            if (from && to) {
+                $.ajax({
+                    url: '/Flight/SearchFlights',
+                    type: 'GET',
+                    data: { from: from, to: to },
+                    success: function (data) {
+                        $("#flightResults").html(data);
+                    },
+                    error: function () {
+                        alert("Error fetching flight data.");
+                    }
+                });
+            } else {
+                alert("Please select both departure and destination.");
+            }
+        });
+    });
+</script>

@@ -1,79 +1,93 @@
-﻿<!DOCTYPE html>
+﻿﻿
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - flight</title>
-    <script type="importmap"></script>
+    <title>@ViewData["Title"] - AirVista</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/flight.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.5/font/bootstrap-icons.min.css">
 </head>
 <body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">AirVista</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
+    <div class="d-flex flex-column" id="wrapper">
+        <!-- Sidebar -->
+        <div class="bg-dark text-white sidebar" id="sidebar-wrapper">
+            <!-- Sidebar Toggle Button - Moved to Top -->
+            <button class="btn btn-sm btn-light sidebar-toggle" id="sidebar-toggle"><i class="bi bi-list"></i></button>
 
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        
-
-                        @if (User.IsInRole("Admin"))
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Home" asp-action="Dashboard">Dashboard</a>
-                            </li>
-
-                            
-                                <li class="nav-item">
-                                    <a class="nav-link" asp-controller="Home" asp-action="Admin">Admin</a>
-                                </li>
-                         
-                            
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Flight" asp-action="Index">Flights</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Airport" asp-action="Index">Airports</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Airline" asp-action="Index">Airlines</a>
-                            </li>
-
-                        }
-
-                        @if (User.IsInRole("User"))
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Home" asp-action="User">User</a>
-                            </li>
-                        }
-
-                        <partial name="_LoginPartial" />
-                    </ul>
-                </div>
+            <div class="sidebar-header">
+                <span class="fs-4 fw-bold sidebar-title"><i class="bi bi-airplane"></i> AirVista</span>
             </div>
-        </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
+
+            <div class="admin-info">
+                <i class="bi bi-person-circle fs-2"></i>
+                <p class="mb-0">Admin</p>
+            </div>
+
+            <div class="list-group list-group-flush">
+                <a href="@Url.Action("Index", "Home")" class="list-group-item list-group-item-action bg-dark text-white">
+                    <i class="bi bi-house-door"></i> <span>Home</span>
+                </a>
+
+                @if (User.IsInRole("Admin"))
+
+                {
+                    <a href="@Url.Action("Dashboard", "Home")" class="list-group-item list-group-item-action bg-dark text-white">
+                        <i class="bi bi-speedometer2"></i> <span>Dashboard</span>
+                    </a>
+                    <a href="@Url.Action("Index", "Flight")" class="list-group-item list-group-item-action bg-dark text-white">
+                        <i class="bi bi-airplane"></i> <span>Flights</span>
+                    </a>
+                    <a href="@Url.Action("Index", "Airport")" class="list-group-item list-group-item-action bg-dark text-white">
+                        <i class="bi bi-building"></i> <span>Airports</span>
+                    </a>
+                    <a href="@Url.Action("Index", "Airline")" class="list-group-item list-group-item-action bg-dark text-white">
+                        <i class="bi bi-briefcase"></i> <span>Airlines</span>
+                    </a>
+                }
+
+                @if (User.IsInRole("User"))
+
+                {
+                    <a href="@Url.Action("User", "Home")" class="list-group-item list-group-item-action bg-dark text-white">
+                        <i class="bi bi-person"></i> <span>User Dashboard</span>
+                    </a>
+                }
+
+                <form id="logoutForm" asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                    <button type="submit" class="list-group-item list-group-item-action bg-dark text-danger border-0" style="background: none; color: red;">
+                        <i class="bi bi-box-arrow-right"></i> <span>Logout</span>
+                    </button>
+                </form>
+
+            </div>
+        </div>
+
+        <!-- Page Content -->
+        <div id="page-content-wrapper">
+            <div class="container-fluid p-4">
+                <main role="main" class="pb-3">
+                    @RenderBody()
+                </main>
+            </div>
+        </div>
     </div>
 
-    <footer class="border-top footer text-muted">
+    <footer class="footer">
         <div class="container">
             &copy; 2025 - AirVista - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
         </div>
     </footer>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script>
+        document.getElementById("sidebar-toggle").addEventListener("click", function () {
+            document.getElementById("wrapper").classList.toggle("toggled");
+        });
+    </script>
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

@@ -30,6 +30,12 @@ namespace flight.Controllers
                 .Include(f => f.ArrivalAirport)
                 .ToListAsync();
 
+            // Populate dropdowns with unique airport values
+            ViewBag.DepartureAirports = new SelectList(
+                flights.Select(f => new { f.DepartureAirport.Id, f.DepartureAirport.Name }).Distinct(),
+                "Id", "Name"
+            );
+
             ViewBag.Airlines = new SelectList(await _context.Airlines.ToListAsync(), "Id", "Name");
             ViewBag.Airports = new SelectList(await _context.Airports.ToListAsync(), "Id", "Name");
 
@@ -168,5 +174,20 @@ namespace flight.Controllers
             ViewBag.Airlines = new SelectList(await _context.Airlines.ToListAsync(), "Id", "Name");
             ViewBag.Airports = new SelectList(await _context.Airports.ToListAsync(), "Id", "Name");
         }
+
+        [HttpGet]
+        public async Task<IActionResult> SearchFlights(int from, int to)
+        {
+            var flights = await _context.Flights
+                .Include(f => f.Airline)
+                .Include(f => f.DepartureAirport)
+                .Include(f => f.ArrivalAirport)
+                .Where(f => f.DepartureAirportId == from && f.ArrivalAirportId == to && f.Status == "Scheduled")
+                .ToListAsync();
+
+            return PartialView("_FlightResults", flights); // Return partial view for AJAX update
+        }
+
+
     }
 }

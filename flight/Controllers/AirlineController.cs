@@ -40,7 +40,6 @@ namespace flight.Controllers
             {
                 if (LogoFile != null && LogoFile.Length > 0)
                 {
-                    string fileName = Path.GetFileName(LogoFile.FileName);
                     string uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "images");
 
                     if (!Directory.Exists(uploadsFolder))
@@ -48,6 +47,7 @@ namespace flight.Controllers
                         Directory.CreateDirectory(uploadsFolder);
                     }
 
+                    string fileName = Guid.NewGuid().ToString() + Path.GetExtension(LogoFile.FileName);
                     string filePath = Path.Combine(uploadsFolder, fileName);
 
                     using (var stream = new FileStream(filePath, FileMode.Create))
@@ -71,7 +71,7 @@ namespace flight.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Airline airline, IFormFile LogoFile)
+        public async Task<IActionResult> Edit(Airline airline, IFormFile LogoFile, string ExistingLogoPath)
         {
             if (ModelState.IsValid)
             {
@@ -81,10 +81,9 @@ namespace flight.Controllers
                     return NotFound();
                 }
 
-                // If a new logo is uploaded, update it, otherwise retain the existing logo
+                // Retain existing logo if no new file is uploaded
                 if (LogoFile != null && LogoFile.Length > 0)
                 {
-                    string fileName = Path.GetFileName(LogoFile.FileName);
                     string uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "images");
 
                     if (!Directory.Exists(uploadsFolder))
@@ -92,6 +91,7 @@ namespace flight.Controllers
                         Directory.CreateDirectory(uploadsFolder);
                     }
 
+                    string fileName = Guid.NewGuid().ToString() + Path.GetExtension(LogoFile.FileName);
                     string filePath = Path.Combine(uploadsFolder, fileName);
 
                     using (var stream = new FileStream(filePath, FileMode.Create))
@@ -100,6 +100,10 @@ namespace flight.Controllers
                     }
 
                     existingAirline.LogoPath = "/images/" + fileName;
+                }
+                else
+                {
+                    existingAirline.LogoPath = ExistingLogoPath; // Retain the old logo
                 }
 
                 existingAirline.Name = airline.Name;
