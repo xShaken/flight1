@@ -1,4 +1,5 @@
-﻿using flight.Models;
+﻿
+using flight.Models;
 using flight.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;

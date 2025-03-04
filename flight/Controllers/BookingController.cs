@@ -19,6 +19,19 @@ namespace flight.Controllers
             _userManager = userManager;
         }
 
+
+        public async Task<IActionResult> Index()
+        {
+            ViewBag.DepartureAirports = await _context.Airports
+                .Select(a => new { Value = a.Id, Text = a.Name })
+                .ToListAsync();
+
+            ViewBag.ArrivalAirports = ViewBag.DepartureAirports; // Assuming same list for both
+
+            return View("~/Views/Users/Index.cshtml");
+        }
+
+
         // Display Booking Form
         public IActionResult Create()
         {

@@ -13,7 +13,7 @@ namespace flight.Controllers
         private readonly AppDbContext _context;  // ✅ Use AppDbContext
         private readonly ILogger<HomeController> _logger;
 
-       
+
         public HomeController(AppDbContext context, ILogger<HomeController> logger)
         {
             _context = context;
@@ -91,67 +91,49 @@ namespace flight.Controllers
                 return NotFound();
             }
 
-            flight.Status = "Scheduled";
-            _context.Update(flight);
-            await _context.SaveChangesAsync();
-
-            return RedirectToAction("Dashboard");
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> MarkAsArrived(int id)
-        {
-            var flight = await _context.Flights.FindAsync(id);
-            if (flight == null)
+            public IActionResult Dashboard()
             {
-                return NotFound();
+                return View();
             }
 
-            // Update EstimatedArrivalDateTime to the current time when marked as Arrived
-            flight.EstimatedArrivalDateTime = DateTime.Now;
-            flight.Status = "Arrived";
-            _context.Update(flight);
-            await _context.SaveChangesAsync();
 
-            return RedirectToAction("Dashboard");
+
+
+            public IActionResult Flights()
+            {
+                return View();
+            }
+
+            public IActionResult Airlines()
+            {
+                var airlines = _context.Airlines.ToList(); // ✅ Fetch airlines correctly
+                return View(airlines);
+            }
+
+            public IActionResult Airports()
+            {
+                var airports = _context.Airports.ToList();
+                return View(airports);
+            }
+
+            //for users (INDEX)
+            [Authorize(Roles = "User")]
+            public async Task<IActionResult> User()
+            {
+                var airports = await _context.Airports.ToListAsync();
+
+                ViewBag.DepartureAirports = airports
+                    .Select(a => new SelectListItem { Value = a.Id.ToString(), Text = a.Name })
+                    .ToList();
+
+                ViewBag.ArrivalAirports = airports
+                    .Select(a => new SelectListItem { Value = a.Id.ToString(), Text = a.Name })
+                    .ToList();
+
+                return View("~/Views/Users/Index.cshtml");
+            }
+
         }
-
-
-
-
-        public IActionResult Flights()
-        {
-            return View();
-        }
-
-        public IActionResult Airlines()
-        {
-            var airlines = _context.Airlines.ToList(); // ✅ Fetch airlines correctly
-            return View(airlines);
-        }
-
-        public IActionResult Airports()
-        {
-            var airports = _context.Airports.ToList();
-            return View(airports);
-        }
-
-        //for users (INDEX)
-        [Authorize(Roles = "User")]
-        public async Task<IActionResult> User()
-        {
-            var airports = await _context.Airports.ToListAsync();
-
-            ViewBag.DepartureAirports = airports
-                .Select(a => new SelectListItem { Value = a.Id.ToString(), Text = a.Name })
-                .ToList();
-
-            ViewBag.ArrivalAirports = airports
-                .Select(a => new SelectListItem { Value = a.Id.ToString(), Text = a.Name })
-                .ToList();
-
-            return View("~/Views/Users/Index.cshtml");
-        }
-
     }
 }
+
