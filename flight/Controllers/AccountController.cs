@@ -43,7 +43,7 @@ namespace flight.Controllers
                 {
                     if (await userManager.IsInRoleAsync(user, "Admin"))
                     {
-                        return RedirectToAction("Admin", "Home"); // Redirect Admin to Admin View
+                        return RedirectToAction("Dashboard", "Home"); // Redirect Admin to Admin View
                     }
 
                     //redirect to the homecontroller
@@ -58,6 +58,12 @@ namespace flight.Controllers
             }
             ModelState.AddModelError("", "Invalid Login Attempt");
             return View(model);
+        }
+
+        [HttpGet]
+        public IActionResult Register()
+        {
+            return View();
         }
 
         [HttpPost]

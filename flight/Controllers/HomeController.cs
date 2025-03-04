@@ -39,6 +39,7 @@ namespace flight.Controllers
         {
             return View();
         }
+
         public async Task<IActionResult> Dashboard()
         {
             var flights = await _context.Flights
@@ -91,15 +92,16 @@ namespace flight.Controllers
                 return NotFound();
             }
 
-            public IActionResult Dashboard()
-            {
-                return View();
-            }
+            // If there's logic to resolve the issue, put it here.
+
+            await _context.SaveChangesAsync();
+            return RedirectToAction("Dashboard");
+        }
 
 
 
 
-            public IActionResult Flights()
+        public IActionResult Flights()
             {
                 return View();
             }
@@ -135,5 +137,5 @@ namespace flight.Controllers
 
         }
     }
-}
+
 

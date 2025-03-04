@@ -8,6 +8,7 @@
     <h2 class="text-center fw-bold">LIST OF AIRLINES</h2>
 
     <div class="d-flex justify-content-start mb-3">
+        <!-- Button to trigger the Create Modal -->
         <button class="btn btn-warning fw-bold px-4 py-2 rounded-pill" data-bs-toggle="modal" data-bs-target="#addAirlineModal">
             <i class="fas fa-plus"></i> Add New
         </button>
@@ -29,20 +30,16 @@
                     </thead>
                     <tbody>
                         @foreach (var airline in Model)
-
                         {
                             <tr>
                                 <td>@airline.Id</td>
                                 <td>@(airline.DateAdded.ToString("yyyy-MM-dd HH:mm"))</td>
                                 <td>
                                     @if (!string.IsNullOrEmpty(airline.LogoPath))
-
                                     {
                                         <img src="@airline.LogoPath" alt="Logo" class="rounded-circle" style="width: 50px; height: 50px;">
                                     }
-
                                     else
-
                                     {
                                         <span>No Logo</span>
                                     }
@@ -69,6 +66,41 @@
                     </tbody>
                 </table>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- CREATE AIRLINE MODAL -->
+<div class="modal fade" id="addAirlineModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add New Airline</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="addAirlineForm" asp-action="Create" asp-controller="Airline" method="post" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Name</label>
+                        <input type="text" name="Name" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Status</label>
+                        <select name="Status" class="form-select">
+                            <option value="Active">Active</option>
+                            <option value="Inactive">Inactive</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Logo</label>
+                        <input type="file" name="LogoFile" class="form-control" />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success">Create</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
@@ -116,6 +148,7 @@
 </div>
 
 <script>
+    // JavaScript for Edit Modal
     document.querySelectorAll(".edit-airline-btn").forEach(button => {
         button.addEventListener("click", function () {
             document.getElementById("editAirlineId").value = this.dataset.id;
