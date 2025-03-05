@@ -1,9 +1,9 @@
 ﻿@model IEnumerable<flight.Models.Flight>
-
-
 @{
     ViewData["Title"] = "Dashboard";
 }
+
+
 
 <div class="container mt-4">
     <!-- Cards for Statistics -->
@@ -21,7 +21,6 @@
                 <div class="card-body">
                     <h5 class="card-title">Available Airlines</h5>
                     <p class="card-text display-6">@ViewBag.AirlinesCount</p>
-
                 </div>
             </div>
         </div>
@@ -39,8 +38,9 @@
     <div class="card shadow mb-4">
         <div class="card-body">
             <h2 class="text-center fw-bold mb-4">Today's Scheduled Flights</h2>
+            <input type="text" id="searchScheduled" class="form-control mb-3" placeholder="Search...">
             <div class="table-responsive">
-                <table class="table table-hover table-bordered text-center align-middle">
+                <table class="table table-hover table-bordered text-center align-middle" id="scheduledTable">
                     <thead class="table-dark">
                         <tr>
                             <th>#</th>
@@ -56,12 +56,9 @@
                     </thead>
                     <tbody>
                         @if (Model != null && Model.Any(f => f.Status == "Scheduled" && f.DepartureDateTime.Date == DateTime.Today))
-
                         {
-
                             int count = 1;
                             @foreach (var flight in Model.Where(f => f.Status == "Scheduled" && f.DepartureDateTime.Date == DateTime.Today))
-
                             {
                                 <tr>
                                     <td>@count</td>
@@ -79,12 +76,9 @@
                                     </td>
                                 </tr>
                                 count++;
-
                             }
                         }
-
                         else
-
                         {
                             <tr>
                                 <td colspan="9" class="text-muted">No scheduled flights for today.</td>
@@ -93,15 +87,16 @@
                     </tbody>
                 </table>
             </div>
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center" id="scheduledPagination"></ul>
+            </nav>
         </div>
     </div>
 
     <!-- Modals for Today's Scheduled Flights -->
     @if (Model != null && Model.Any(f => f.Status == "Scheduled" && f.DepartureDateTime.Date == DateTime.Today))
-
     {
         @foreach (var flight in Model.Where(f => f.Status == "Scheduled" && f.DepartureDateTime.Date == DateTime.Today))
-
         {
             <div class="modal fade" id="flightModal-@flight.Id" tabindex="-1" aria-labelledby="flightModalLabel-@flight.Id" aria-hidden="true">
                 <div class="modal-dialog">
@@ -133,8 +128,9 @@
     <div class="card shadow mb-4">
         <div class="card-body">
             <h2 class="text-center fw-bold mb-4">Today's Flight Issues</h2>
+            <input type="text" id="searchIssues" class="form-control mb-3" placeholder="Search...">
             <div class="table-responsive">
-                <table class="table table-hover table-bordered text-center align-middle">
+                <table class="table table-hover table-bordered text-center align-middle" id="issuesTable">
                     <thead class="table-dark">
                         <tr>
                             <th>#</th>
@@ -150,12 +146,9 @@
                     </thead>
                     <tbody>
                         @if (Model != null && Model.Any(f => (f.Status == "Delayed" || f.Status == "Cancelled") && f.DepartureDateTime.Date == DateTime.Today))
-
                         {
-
                             int count = 1;
                             @foreach (var flight in Model.Where(f => (f.Status == "Delayed" || f.Status == "Cancelled") && f.DepartureDateTime.Date == DateTime.Today))
-
                             {
                                 <tr>
                                     <td>@count</td>
@@ -176,12 +169,9 @@
                                     </td>
                                 </tr>
                                 count++;
-
                             }
                         }
-
                         else
-
                         {
                             <tr>
                                 <td colspan="9" class="text-muted">No flight issues for today.</td>
@@ -190,6 +180,9 @@
                     </tbody>
                 </table>
             </div>
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center" id="issuesPagination"></ul>
+            </nav>
         </div>
     </div>
 
@@ -197,8 +190,9 @@
     <div class="card shadow mb-4">
         <div class="card-body">
             <h2 class="text-center fw-bold mb-4">Flights Departed Today</h2>
+            <input type="text" id="searchDeparted" class="form-control mb-3" placeholder="Search...">
             <div class="table-responsive">
-                <table class="table table-hover table-bordered text-center align-middle">
+                <table class="table table-hover table-bordered text-center align-middle" id="departedTable">
                     <thead class="table-dark">
                         <tr>
                             <th>#</th>
@@ -214,12 +208,9 @@
                     </thead>
                     <tbody>
                         @if (Model != null && Model.Any(f => f.Status == "Departed" && f.DepartureDateTime.Date == DateTime.Today))
-
                         {
-
                             int count = 1;
                             @foreach (var flight in Model.Where(f => f.Status == "Departed" && f.DepartureDateTime.Date == DateTime.Today))
-
                             {
                                 <tr>
                                     <td>@count</td>
@@ -240,12 +231,9 @@
                                     </td>
                                 </tr>
                                 count++;
-
                             }
                         }
-
                         else
-
                         {
                             <tr>
                                 <td colspan="9" class="text-muted">No departed flights for today.</td>
@@ -254,6 +242,9 @@
                     </tbody>
                 </table>
             </div>
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center" id="departedPagination"></ul>
+            </nav>
         </div>
     </div>
 
@@ -261,8 +252,9 @@
     <div class="card shadow">
         <div class="card-body">
             <h2 class="text-center fw-bold mb-4">Flights Arrived Today</h2>
+            <input type="text" id="searchArrived" class="form-control mb-3" placeholder="Search...">
             <div class="table-responsive">
-                <table class="table table-hover table-bordered text-center align-middle">
+                <table class="table table-hover table-bordered text-center align-middle" id="arrivedTable">
                     <thead class="table-dark">
                         <tr>
                             <th>#</th>
@@ -277,12 +269,9 @@
                     </thead>
                     <tbody>
                         @if (Model != null && Model.Any(f => f.Status == "Arrived" && f.DepartureDateTime.Date == DateTime.Today))
-
                         {
-
                             int count = 1;
                             @foreach (var flight in Model.Where(f => f.Status == "Arrived" && f.DepartureDateTime.Date == DateTime.Today))
-
                             {
                                 <tr>
                                     <td>@count</td>
@@ -297,12 +286,9 @@
                                     </td>
                                 </tr>
                                 count++;
-
                             }
                         }
-
                         else
-
                         {
                             <tr>
                                 <td colspan="8" class="text-muted">No arrived flights for today.</td>
@@ -311,6 +297,76 @@
                     </tbody>
                 </table>
             </div>
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center" id="arrivedPagination"></ul>
+            </nav>
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        function paginateTable(tableId, paginationId, entriesPerPage) {
+            const table = document.getElementById(tableId);
+            const rows = table.querySelectorAll('tbody tr');
+            const pageCount = Math.ceil(rows.length / entriesPerPage);
+            const pagination = document.getElementById(paginationId);
+
+            function showPage(page) {
+                const start = (page - 1) * entriesPerPage;
+                const end = start + entriesPerPage;
+                rows.forEach((row, index) => {
+                    row.style.display = (index >= start && index < end) ? '' : 'none';
+                });
+            }
+
+            function updatePagination(currentPage) {
+                pagination.innerHTML = '';
+                for (let i = 1; i <= pageCount; i++) {
+                    const li = document.createElement('li');
+                    li.className = 'page-item' + (i === currentPage ? ' active' : '');
+                    const a = document.createElement('a');
+                    a.className = 'page-link';
+                    a.href = '#';
+                    a.textContent = i;
+                    a.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        showPage(i);
+                        updatePagination(i);
+                    });
+                    li.appendChild(a);
+                    pagination.appendChild(li);
+                }
+            }
+
+            showPage(1);
+            updatePagination(1);
+        }
+
+        function filterTable(tableId, searchId) {
+            const search = document.getElementById(searchId);
+            const table = document.getElementById(tableId);
+            const rows = table.querySelectorAll('tbody tr');
+
+            search.addEventListener('input', () => {
+                const filter = search.value.toLowerCase();
+                rows.forEach(row => {
+                    const text = row.textContent.toLowerCase();
+                    row.style.display = text.includes(filter) ? '' : 'none';
+                });
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            paginateTable('scheduledTable', 'scheduledPagination', 6);
+            paginateTable('issuesTable', 'issuesPagination', 6);
+            paginateTable('departedTable', 'departedPagination', 6);
+            paginateTable('arrivedTable', 'arrivedPagination', 6);
+
+            filterTable('scheduledTable', 'searchScheduled');
+            filterTable('issuesTable', 'searchIssues');
+            filterTable('departedTable', 'searchDeparted');
+            filterTable('arrivedTable', 'searchArrived');
+        });
+    </script>
+}}

@@ -10,9 +10,8 @@ namespace flight.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly AppDbContext _context;  // ✅ Use AppDbContext
+        private readonly AppDbContext _context;
         private readonly ILogger<HomeController> _logger;
-
 
         public HomeController(AppDbContext context, ILogger<HomeController> logger)
         {
@@ -24,10 +23,12 @@ namespace flight.Controllers
         {
             return View();
         }
+
         public IActionResult Landingpage()
         {
             return View();
         }
+
         [Authorize]
         public IActionResult Privacy()
         {
@@ -48,9 +49,8 @@ namespace flight.Controllers
                 .Include(f => f.ArrivalAirport)
                 .ToListAsync();
 
-            var airlinesCount = await _context.Airlines.CountAsync(); // Get total airlines
-
-            ViewBag.AirlinesCount = airlinesCount; // Pass to the view
+            var airlinesCount = await _context.Airlines.CountAsync();
+            ViewBag.AirlinesCount = airlinesCount;
 
             return View(flights);
         }
@@ -66,13 +66,11 @@ namespace flight.Controllers
 
             if (status == "Delayed" && delayMinutes.HasValue)
             {
-                // Update both departure and arrival times if delayed
                 flight.DepartureDateTime = flight.DepartureDateTime.AddMinutes(delayMinutes.Value);
                 flight.EstimatedArrivalDateTime = flight.EstimatedArrivalDateTime.AddMinutes(delayMinutes.Value);
             }
             else if (status == "Departed")
             {
-                // Update DepartureDateTime to the current time when marked as Departed
                 flight.DepartureDateTime = DateTime.Now;
             }
 
@@ -92,50 +90,60 @@ namespace flight.Controllers
                 return NotFound();
             }
 
-            // If there's logic to resolve the issue, put it here.
-
+            flight.Status = "Scheduled";
+            _context.Update(flight);
             await _context.SaveChangesAsync();
+
             return RedirectToAction("Dashboard");
         }
 
+        [HttpPost]
+        public async Task<IActionResult> MarkAsArrived(int id)
+        {
+            var flight = await _context.Flights.FindAsync(id);
+            if (flight == null)
+            {
+                return NotFound();
+            }
 
+            flight.Status = "Arrived";
+            _context.Update(flight);
+            await _context.SaveChangesAsync();
 
+            return RedirectToAction("Dashboard");
+        }
 
         public IActionResult Flights()
-            {
-                return View();
-            }
+        {
+            return View();
+        }
 
-            public IActionResult Airlines()
-            {
-                var airlines = _context.Airlines.ToList(); // ✅ Fetch airlines correctly
-                return View(airlines);
-            }
+        public IActionResult Airlines()
+        {
+            var airlines = _context.Airlines.ToList();
+            return View(airlines);
+        }
 
-            public IActionResult Airports()
-            {
-                var airports = _context.Airports.ToList();
-                return View(airports);
-            }
+        public IActionResult Airports()
+        {
+            var airports = _context.Airports.ToList();
+            return View(airports);
+        }
 
-            //for users (INDEX)
-            [Authorize(Roles = "User")]
-            public async Task<IActionResult> User()
-            {
-                var airports = await _context.Airports.ToListAsync();
+        [Authorize(Roles = "User")]
+        public async Task<IActionResult> User()
+        {
+            var airports = await _context.Airports.ToListAsync();
 
-                ViewBag.DepartureAirports = airports
-                    .Select(a => new SelectListItem { Value = a.Id.ToString(), Text = a.Name })
-                    .ToList();
+            ViewBag.DepartureAirports = airports
+                .Select(a => new SelectListItem { Value = a.Id.ToString(), Text = a.Name })
+                .ToList();
 
-                ViewBag.ArrivalAirports = airports
-                    .Select(a => new SelectListItem { Value = a.Id.ToString(), Text = a.Name })
-                    .ToList();
+            ViewBag.ArrivalAirports = airports
+                .Select(a => new SelectListItem { Value = a.Id.ToString(), Text = a.Name })
+                .ToList();
 
-                return View("~/Views/Users/Index.cshtml");
-            }
-
+            return View("~/Views/Users/Index.cshtml");
         }
     }
-
-
+}

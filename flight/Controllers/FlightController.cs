@@ -52,7 +52,7 @@ namespace flight.Controllers
         // Handle flight creation
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("FlightNumber, AirlineId, AircraftCode, DepartureAirportId, ArrivalAirportId, DepartureDateTime, EstimatedArrivalDateTime, BusinessSeatsAvailable, BusinessClassPrice, EconomySeatsAvailable, EconomyClassPrice, FirstClassSeatsAvailable, FirstClassPrice, Status")] Flight flight)
+        public async Task<IActionResult> Create([Bind("FlightNumber,AirlineId,AircraftCode,DepartureAirportId,ArrivalAirportId,DepartureDateTime,EstimatedArrivalDateTime,BusinessSeatsAvailable,BusinessClassPrice,EconomySeatsAvailable,EconomyClassPrice,FirstClassSeatsAvailable,FirstClassPrice")] Flight flight)
         {
             if (flight.DepartureDateTime >= flight.EstimatedArrivalDateTime)
             {
@@ -64,10 +64,18 @@ namespace flight.Controllers
                 _logger.LogError("Validation failed: {Errors}",
                     string.Join(", ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)));
 
+                // Repopulate dropdowns and return to Index with validation errors
                 await PopulateDropdowns();
-                return View(flight);
+                var flights = await _context.Flights
+                    .Include(f => f.Airline)
+                    .Include(f => f.DepartureAirport)
+                    .Include(f => f.ArrivalAirport)
+                    .ToListAsync();
+                return View("Index", flights);
             }
 
+            // Set status to "Scheduled" automatically
+            flight.Status = "Scheduled";
             flight.DateAdded = DateTime.UtcNow;
 
             try
@@ -83,9 +91,17 @@ namespace flight.Controllers
                 ModelState.AddModelError("", "An error occurred while saving the flight.");
             }
 
+            // Repopulate dropdowns and return to Index with error message
             await PopulateDropdowns();
-            return View(flight);
+            var flightsList = await _context.Flights
+                .Include(f => f.Airline)
+                .Include(f => f.DepartureAirport)
+                .Include(f => f.ArrivalAirport)
+                .ToListAsync();
+            return View("Index", flightsList);
         }
+
+
 
         // Show the edit flight modal (GET request - optional, but useful for debugging)
         public async Task<IActionResult> Edit(int id)

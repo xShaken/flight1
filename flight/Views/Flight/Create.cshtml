@@ -4,106 +4,135 @@
     ViewData["Title"] = "Create Flight";
 }
 
-<h2>Create Flight</h2>
+<div class="container mt-5">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h2 class="card-title mb-0">Create New Flight</h2>
+        </div>
+        <div class="card-body">
+            <form asp-action="Create" method="post" class="needs-validation" novalidate onsubmit="return validateAirports()">
+                <div class="row g-3">
+                    <!-- Flight Number -->
+                    <div class="col-md-6">
+                        <label asp-for="FlightNumber" class="form-label">Flight Number</label>
+                        <input asp-for="FlightNumber" class="form-control" required />
+                        <span asp-validation-for="FlightNumber" class="text-danger"></span>
+                    </div>
 
-<form asp-action="Create" method="post">
-    <div class="form-group">
-        <label asp-for="FlightNumber"></label>
-        <input asp-for="FlightNumber" class="form-control" required />
-        <span asp-validation-for="FlightNumber" class="text-danger"></span>
+                    <!-- Airline -->
+                    <div class="col-md-6">
+                        <label asp-for="AirlineId" class="form-label">Airline</label>
+                        <select asp-for="AirlineId" class="form-select" asp-items="ViewBag.Airlines" required>
+                            <option value="">-- Select Airline --</option>
+                        </select>
+                        <span asp-validation-for="AirlineId" class="text-danger"></span>
+                    </div>
+
+                    <!-- Aircraft Code -->
+                    <div class="col-md-6">
+                        <label asp-for="AircraftCode" class="form-label">Aircraft Code</label>
+                        <input asp-for="AircraftCode" class="form-control" required />
+                        <span asp-validation-for="AircraftCode" class="text-danger"></span>
+                    </div>
+
+                    <!-- Departure Airport -->
+                    <div class="col-md-6">
+                        <label asp-for="DepartureAirportId" class="form-label">Departure Airport</label>
+                        <select asp-for="DepartureAirportId" id="DepartureAirportId" class="form-select" asp-items="ViewBag.Airports" required>
+                            <option value="">-- Select Departure Airport --</option>
+                        </select>
+                        <span asp-validation-for="DepartureAirportId" class="text-danger"></span>
+                    </div>
+
+                    <!-- Departure Time -->
+                    <div class="col-md-6">
+                        <label asp-for="DepartureDateTime" class="form-label">Departure Time</label>
+                        <input asp-for="DepartureDateTime" type="datetime-local" class="form-control" required />
+                        <span asp-validation-for="DepartureDateTime" class="text-danger"></span>
+                    </div>
+
+                    <!-- Arrival Airport -->
+                    <div class="col-md-6">
+                        <label asp-for="ArrivalAirportId" class="form-label">Arrival Airport</label>
+                        <select asp-for="ArrivalAirportId" id="ArrivalAirportId" class="form-select" asp-items="ViewBag.Airports" required>
+                            <option value="">-- Select Arrival Airport --</option>
+                        </select>
+                        <span asp-validation-for="ArrivalAirportId" class="text-danger"></span>
+                    </div>
+
+                    <!-- Arrival Time -->
+                    <div class="col-md-6">
+                        <label asp-for="EstimatedArrivalDateTime" class="form-label">Arrival Time</label>
+                        <input asp-for="EstimatedArrivalDateTime" type="datetime-local" class="form-control" required />
+                        <span asp-validation-for="EstimatedArrivalDateTime" class="text-danger"></span>
+                    </div>
+
+                    <!-- Business Seats -->
+                    <div class="col-md-6">
+                        <label asp-for="BusinessSeatsAvailable" class="form-label">Business Class Seats</label>
+                        <input asp-for="BusinessSeatsAvailable" type="number" class="form-control" required />
+                        <span asp-validation-for="BusinessSeatsAvailable" class="text-danger"></span>
+                    </div>
+
+                    <!-- Business Class Price -->
+                    <div class="col-md-6">
+                        <label asp-for="BusinessClassPrice" class="form-label">Business Class Price</label>
+                        <input asp-for="BusinessClassPrice" type="number" step="0.01" class="form-control" required />
+                        <span asp-validation-for="BusinessClassPrice" class="text-danger"></span>
+                    </div>
+
+                    <!-- Economy Seats -->
+                    <div class="col-md-6">
+                        <label asp-for="EconomySeatsAvailable" class="form-label">Economy Class Seats</label>
+                        <input asp-for="EconomySeatsAvailable" type="number" class="form-control" required />
+                        <span asp-validation-for="EconomySeatsAvailable" class="text-danger"></span>
+                    </div>
+
+                    <!-- Economy Class Price -->
+                    <div class="col-md-6">
+                        <label asp-for="EconomyClassPrice" class="form-label">Economy Class Price</label>
+                        <input asp-for="EconomyClassPrice" type="number" step="0.01" class="form-control" required />
+                        <span asp-validation-for="EconomyClassPrice" class="text-danger"></span>
+                    </div>
+
+                    <!-- First Class Seats -->
+                    <div class="col-md-6">
+                        <label asp-for="FirstClassSeatsAvailable" class="form-label">First Class Seats</label>
+                        <input asp-for="FirstClassSeatsAvailable" type="number" class="form-control" required />
+                        <span asp-validation-for="FirstClassSeatsAvailable" class="text-danger"></span>
+                    </div>
+
+                    <!-- First Class Price -->
+                    <div class="col-md-6">
+                        <label asp-for="FirstClassPrice" class="form-label">First Class Price</label>
+                        <input asp-for="FirstClassPrice" type="number" step="0.01" class="form-control" required />
+                        <span asp-validation-for="FirstClassPrice" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary">Save Flight</button>
+                    <a asp-action="Index" class="btn btn-secondary ms-2">Cancel</a>
+                </div>
+            </form>
+        </div>
     </div>
-
-    <div class="form-group">
-        <label asp-for="AirlineId"></label>
-        <select asp-for="AirlineId" class="form-control" asp-items="ViewBag.Airlines" required>
-            <option value="">-- Select Airline --</option>
-        </select>
-        <span asp-validation-for="AirlineId" class="text-danger"></span>
-    </div>
-
-    <div class="form-group">
-        <label asp-for="AircraftCode"></label>
-        <input asp-for="AircraftCode" class="form-control" required />
-        <span asp-validation-for="AircraftCode" class="text-danger"></span>
-    </div>
-
-    <div class="form-group">
-        <label asp-for="DepartureAirportId"></label>
-        <select asp-for="DepartureAirportId" class="form-control" asp-items="ViewBag.Airports" required>
-            <option value="">-- Select Departure Airport --</option>
-        </select>
-        <span asp-validation-for="DepartureAirportId" class="text-danger"></span>
-    </div>
-
-    <div class="form-group">
-        <label asp-for="ArrivalAirportId"></label>
-        <select asp-for="ArrivalAirportId" class="form-control" asp-items="ViewBag.Airports" required>
-            <option value="">-- Select Arrival Airport --</option>
-        </select>
-        <span asp-validation-for="ArrivalAirportId" class="text-danger"></span>
-    </div>
-
-    <div class="form-group">
-        <label asp-for="DepartureDateTime"></label>
-        <input asp-for="DepartureDateTime" type="datetime-local" class="form-control" required />
-        <span asp-validation-for="DepartureDateTime" class="text-danger"></span>
-    </div>
-
-    <div class="form-group">
-        <label asp-for="EstimatedArrivalDateTime"></label>
-        <input asp-for="EstimatedArrivalDateTime" type="datetime-local" class="form-control" required />
-        <span asp-validation-for="EstimatedArrivalDateTime" class="text-danger"></span>
-    </div>
-
-    <div class="form-group">
-        <label asp-for="BusinessSeatsAvailable"></label>
-        <input asp-for="BusinessSeatsAvailable" type="number" class="form-control" required />
-        <span asp-validation-for="BusinessSeatsAvailable" class="text-danger"></span>
-    </div>
-
-    <div class="form-group">
-        <label asp-for="BusinessClassPrice"></label>
-        <input asp-for="BusinessClassPrice" type="number" step="0.01" class="form-control" required />
-        <span asp-validation-for="BusinessClassPrice" class="text-danger"></span>
-    </div>
-
-    <div class="form-group">
-        <label asp-for="EconomySeatsAvailable"></label>
-        <input asp-for="EconomySeatsAvailable" type="number" class="form-control" required />
-        <span asp-validation-for="EconomySeatsAvailable" class="text-danger"></span>
-    </div>
-
-    <div class="form-group">
-        <label asp-for="EconomyClassPrice"></label>
-        <input asp-for="EconomyClassPrice" type="number" step="0.01" class="form-control" required />
-        <span asp-validation-for="EconomyClassPrice" class="text-danger"></span>
-    </div>
-
-    <div class="form-group">
-        <label asp-for="FirstClassSeatsAvailable"></label>
-        <input asp-for="FirstClassSeatsAvailable" type="number" class="form-control" required />
-        <span asp-validation-for="FirstClassSeatsAvailable" class="text-danger"></span>
-    </div>
-
-    <div class="form-group">
-        <label asp-for="FirstClassPrice"></label>
-        <input asp-for="FirstClassPrice" type="number" step="0.01" class="form-control" required />
-        <span asp-validation-for="FirstClassPrice" class="text-danger"></span>
-    </div>
-
-    <div class="form-group">
-        <label asp-for="Status"></label>
-        <select asp-for="Status" class="form-control" required>
-            <option value="Scheduled">Scheduled</option>
-            <option value="Delayed">Delayed</option>
-            <option value="Cancelled">Cancelled</option>
-        </select>
-        <span asp-validation-for="Status" class="text-danger"></span>
-    </div>
-
-    <button type="submit" class="btn btn-primary">Save Flight</button>
-</form>
+</div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        // JavaScript to prevent same airport for departure and arrival
+        function validateAirports() {
+            const departureAirport = document.getElementById("DepartureAirportId").value;
+            const arrivalAirport = document.getElementById("ArrivalAirportId").value;
+
+            if (departureAirport === arrivalAirport) {
+                alert("Departure and Arrival airports cannot be the same.");
+                return false; // Prevent form submission
+            }
+            return true; // Allow form submission
+        }
+    </script>
 }
