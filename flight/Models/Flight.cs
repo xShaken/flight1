@@ -59,6 +59,10 @@ namespace flight.Models
         [Column(TypeName = "decimal(18,2)")]
         public decimal FirstClassPrice { get; set; }
 
+        [Required]
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal TicketPrice { get; set; } // New property for general ticket price
+
         public DateTime DateAdded { get; set; } = DateTime.UtcNow;
 
         [Required]

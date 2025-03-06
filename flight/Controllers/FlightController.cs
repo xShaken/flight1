@@ -52,7 +52,7 @@ namespace flight.Controllers
         // Handle flight creation
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("FlightNumber,AirlineId,AircraftCode,DepartureAirportId,ArrivalAirportId,DepartureDateTime,EstimatedArrivalDateTime,BusinessSeatsAvailable,BusinessClassPrice,EconomySeatsAvailable,EconomyClassPrice,FirstClassSeatsAvailable,FirstClassPrice")] Flight flight)
+        public async Task<IActionResult> Create([Bind("FlightNumber,AirlineId,AircraftCode,DepartureAirportId,ArrivalAirportId,DepartureDateTime,EstimatedArrivalDateTime,BusinessSeatsAvailable,BusinessClassPrice,EconomySeatsAvailable,EconomyClassPrice,FirstClassSeatsAvailable,FirstClassPrice,TicketPrice")] Flight flight)
         {
             if (flight.DepartureDateTime >= flight.EstimatedArrivalDateTime)
             {
@@ -119,7 +119,7 @@ namespace flight.Controllers
         // Handle flight editing
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id, FlightNumber, AirlineId, AircraftCode, DepartureAirportId, ArrivalAirportId, DepartureDateTime, EstimatedArrivalDateTime, BusinessSeatsAvailable, BusinessClassPrice, EconomySeatsAvailable, EconomyClassPrice, FirstClassSeatsAvailable, FirstClassPrice, Status")] Flight flight)
+        public async Task<IActionResult> Edit(int id, [Bind("Id, FlightNumber, AirlineId, AircraftCode, DepartureAirportId, ArrivalAirportId, DepartureDateTime, EstimatedArrivalDateTime, BusinessSeatsAvailable, BusinessClassPrice, EconomySeatsAvailable, EconomyClassPrice, FirstClassSeatsAvailable, FirstClassPrice, TicketPrice, Status")] Flight flight)
         {
             if (id != flight.Id)
             {
@@ -162,6 +162,7 @@ namespace flight.Controllers
                 existingFlight.EconomyClassPrice = flight.EconomyClassPrice;
                 existingFlight.FirstClassSeatsAvailable = flight.FirstClassSeatsAvailable;
                 existingFlight.FirstClassPrice = flight.FirstClassPrice;
+                existingFlight.TicketPrice = flight.TicketPrice; // Add this line
                 existingFlight.Status = flight.Status;
 
                 _context.Update(existingFlight);
@@ -183,7 +184,7 @@ namespace flight.Controllers
 
             return RedirectToAction("Index");
         }
-     
+
         // Populate Airlines & Airports dropdowns
         private async Task PopulateDropdowns()
         {
@@ -192,18 +193,20 @@ namespace flight.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> SearchFlights(int from, int to)
+        public async Task<IActionResult> SearchFlights(int from, int to, DateTime departureDate)
         {
             var flights = await _context.Flights
                 .Include(f => f.Airline)
                 .Include(f => f.DepartureAirport)
                 .Include(f => f.ArrivalAirport)
-                .Where(f => f.DepartureAirportId == from && f.ArrivalAirportId == to && f.Status == "Scheduled")
+                .Where(f => f.DepartureAirportId == from
+                            && f.ArrivalAirportId == to
+                            && f.DepartureDateTime.Date == departureDate.Date
+                            && f.Status == "Scheduled")
                 .ToListAsync();
 
             return PartialView("_FlightResults", flights); // Return partial view for AJAX update
         }
-
 
     }
 }
