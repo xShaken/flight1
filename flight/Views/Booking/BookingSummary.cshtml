@@ -1,0 +1,25 @@
+﻿@model flight.Models.Booking
+
+<h2>Booking Summary</h2>
+
+<p>Your booking has been confirmed. Here are the details:</p>
+
+<ul>
+    <li>Departure Flight: @Model.Flight.DepartureAirport.Name to @Model.Flight.ArrivalAirport.Name</li>
+    @if (Model.ReturnFlight != null)
+    {
+        <li>Return Flight: @Model.ReturnFlight.DepartureAirport.Name to @Model.ReturnFlight.ArrivalAirport.Name</li>
+    }
+    <li>Seat Class: @Model.SeatClass</li>
+    <li>Number of Adults: @Model.NumberOfAdults</li>
+    <li>Number of Children: @Model.NumberOfChildren</li>
+    <li>Total Price: ₱@Model.TotalPrice</li>
+</ul>
+
+<h3>Guest Details</h3>
+<ul>
+    @foreach (var guest in Model.Guests)
+    {
+        <li>@guest.FirstName @guest.LastName (@(guest.IsChild ? "Child" : "Adult"))</li>
+    }
+</ul>

@@ -1,0 +1,41 @@
+﻿@model flight.Models.FlightSelectionViewModel
+
+<h2>Guest Information</h2>
+
+<form method="post" action="@Url.Action("ConfirmBooking", "Booking")">
+    <input type="hidden" name="departureFlightId" value="@Model.DepartureFlight.Id" />
+    <input type="hidden" name="returnFlightId" value="@(Model.ReturnFlight?.Id ?? 0)" />
+    <input type="hidden" name="seatClass" value="@Model.SeatClass" />
+    <input type="hidden" name="numberOfAdults" value="@Model.NumberOfAdults" />
+    <input type="hidden" name="numberOfChildren" value="@Model.NumberOfChildren" />
+
+    @for (int i = 0; i < Model.NumberOfAdults; i++)
+    {
+        <h3>Adult @(i + 1)</h3>
+        <div class="form-group">
+            <label for="adultFirstName_@i">First Name:</label>
+            <input type="text" class="form-control" id="adultFirstName_@i" name="guests[@i].FirstName" required>
+        </div>
+        <div class="form-group">
+            <label for="adultLastName_@i">Last Name:</label>
+            <input type="text" class="form-control" id="adultLastName_@i" name="guests[@i].LastName" required>
+        </div>
+        <input type="hidden" name="guests[@i].IsChild" value="false" />
+    }
+
+    @for (int i = 0; i < Model.NumberOfChildren; i++)
+    {
+        <h3>Child @(i + 1)</h3>
+        <div class="form-group">
+            <label for="childFirstName_@i">First Name:</label>
+            <input type="text" class="form-control" id="childFirstName_@i" name="guests[@(Model.NumberOfAdults + i)].FirstName" required>
+        </div>
+        <div class="form-group">
+            <label for="childLastName_@i">Last Name:</label>
+            <input type="text" class="form-control" id="childLastName_@i" name="guests[@(Model.NumberOfAdults + i)].LastName" required>
+        </div>
+        <input type="hidden" name="guests[@(Model.NumberOfAdults + i)].IsChild" value="true" />
+    }
+
+    <button type="submit" class="btn btn-primary">Continue</button>
+</form>

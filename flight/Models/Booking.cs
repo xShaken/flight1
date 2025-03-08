@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -12,6 +13,10 @@ namespace flight.Models
         [ForeignKey("Flight")]
         public int FlightId { get; set; }
         public Flight? Flight { get; set; }
+
+        [ForeignKey("ReturnFlight")]
+        public int? ReturnFlightId { get; set; } // For round-trip bookings
+        public Flight? ReturnFlight { get; set; }
 
         [Required]
         [ForeignKey("Users")]
@@ -30,8 +35,6 @@ namespace flight.Models
         [Column(TypeName = "decimal(18,2)")]
         public decimal TotalPrice { get; set; } // Automatically calculated based on seat selection
 
-
-
         [Required]
         public DateTime DepartureDate { get; set; } // Selected departure date
 
@@ -40,5 +43,7 @@ namespace flight.Models
         public DateTime BookingDate { get; set; } = DateTime.UtcNow;
 
         public string Status { get; set; } = "Pending"; // Pending, Confirmed, Cancelled
+
+        public List<Guest> Guests { get; set; } = new List<Guest>(); // List of guests
     }
 }

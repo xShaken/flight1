@@ -1,7 +1,8 @@
-﻿@model List<flight.Models.Flight>
+﻿@model flight.Models.FlightSearchResultViewModel
 
-@if (Model.Any())
+@if (Model.DepartureFlights.Any())
 {
+    <h4>Departure Flights</h4>
     <table class="table table-hover mt-3">
         <thead class="table-dark">
             <tr>
@@ -14,7 +15,7 @@
             </tr>
         </thead>
         <tbody>
-            @foreach (var flight in Model)
+            @foreach (var flight in Model.DepartureFlights)
             {
                 <tr>
                     <td><strong>@flight.FlightNumber</strong></td>
@@ -35,7 +36,6 @@
                             <span class="badge bg-primary">
                                 Economy: @flight.EconomySeatsAvailable seats - ₱@flight.EconomyClassPrice
                             </span>
-
                             <br />
                         }
                         @if (flight.BusinessSeatsAvailable > 0)
@@ -43,7 +43,6 @@
                             <span class="badge bg-success">
                                 Business: @flight.BusinessSeatsAvailable seats - ₱@flight.BusinessClassPrice
                             </span>
-
                             <br />
                         }
                         @if (flight.FirstClassSeatsAvailable > 0)
@@ -54,18 +53,131 @@
                         }
                     </td>
                     <td>
-                        <a href="@Url.Action("Book", "Booking", new { id = flight.Id })" class="btn btn-outline-success btn-sm">
-                            <i class="bi bi-cart-check"></i> Book Now
-                        </a>
+                        <button class="btn btn-outline-success btn-sm select-flight" data-flight-id="@flight.Id" data-flight-type="departure">
+                            <i class="bi bi-cart-check"></i> Select
+                        </button>
                     </td>
                 </tr>
             }
         </tbody>
     </table>
+
+    @if (Model.IsRoundTrip && Model.ReturnFlights.Any())
+    {
+        <h4>Return Flights</h4>
+        <table class="table table-hover mt-3">
+            <thead class="table-dark">
+                <tr>
+                    <th>Flight No.</th>
+                    <th>Airline</th>
+                    <th>Departure</th>
+                    <th>Arrival</th>
+                    <th>Seats & Prices</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var flight in Model.ReturnFlights)
+                {
+                    <tr>
+                        <td><strong>@flight.FlightNumber</strong></td>
+                        <td>@flight.Airline.Name</td>
+                        <td>
+                            <i class="bi bi-airplane-fill"></i>
+                            @flight.DepartureAirport.Name <br />
+                            <small class="text-muted">@flight.DepartureDateTime.ToString("f")</small>
+                        </td>
+                        <td>
+                            <i class="bi bi-geo-alt-fill"></i>
+                            @flight.ArrivalAirport.Name <br />
+                            <small class="text-muted">@flight.EstimatedArrivalDateTime.ToString("f")</small>
+                        </td>
+                        <td>
+                            @if (flight.EconomySeatsAvailable > 0)
+                            {
+                                <span class="badge bg-primary">
+                                    Economy: @flight.EconomySeatsAvailable seats - ₱@flight.EconomyClassPrice
+                                </span>
+                                <br />
+                            }
+                            @if (flight.BusinessSeatsAvailable > 0)
+                            {
+                                <span class="badge bg-success">
+                                    Business: @flight.BusinessSeatsAvailable seats - ₱@flight.BusinessClassPrice
+                                </span>
+                                <br />
+                            }
+                            @if (flight.FirstClassSeatsAvailable > 0)
+                            {
+                                <span class="badge bg-warning text-dark">
+                                    First Class: @flight.FirstClassSeatsAvailable seats - ₱@flight.FirstClassPrice
+                                </span>
+                            }
+                        </td>
+                        <td>
+                            <button class="btn btn-outline-success btn-sm select-flight" data-flight-id="@flight.Id" data-flight-type="return">
+                                <i class="bi bi-cart-check"></i> Select
+                            </button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
 }
 else
 {
     <p class="text-warning text-center mt-3">
         <i class="bi bi-exclamation-triangle-fill"></i> No flights found for the selected criteria.
     </p>
+}
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            var selectedDepartureFlightId = null;
+            var selectedReturnFlightId = null;
+            var isRoundTrip = @Json.Serialize(Model.IsRoundTrip);
+
+            console.log("Document ready. Flight selection script loaded.");
+            console.log("IsRoundTrip:", isRoundTrip);
+
+            // Use event delegation for dynamically added elements
+            $(document).on("click", ".select-flight", function () {
+                var flightId = $(this).data("flight-id");
+                var flightType = $(this).data("flight-type");
+
+                console.log("Flight ID:", flightId, "Flight Type:", flightType);
+
+                if (flightType === "departure") {
+                    selectedDepartureFlightId = flightId;
+                } else if (flightType === "return") {
+                    selectedReturnFlightId = flightId;
+                }
+
+                console.log("Selected Departure Flight ID:", selectedDepartureFlightId);
+                console.log("Selected Return Flight ID:", selectedReturnFlightId);
+                console.log("Condition for redirect:", selectedDepartureFlightId && (!isRoundTrip || selectedReturnFlightId));
+
+                if (selectedDepartureFlightId && (!isRoundTrip || selectedReturnFlightId)) {
+                    var url = "@Url.Action("SelectFlights", "Booking", new
+            {
+                departureFlightId = "__DEPARTURE__",
+                returnFlightId = "__RETURN__",
+                seatClass = "Economy",
+                numberOfAdults = @Model.NumberOfAdults,
+                numberOfChildren = @Model.NumberOfChildren
+            })";
+
+                    url = url.replace("__DEPARTURE__", selectedDepartureFlightId)
+                        .replace("__RETURN__", selectedReturnFlightId || 0);
+
+                    console.log("Redirecting to:", url);
+                    window.location.href = url;
+                } else {
+                    alert("Please select both departure and return flights.");
+                }
+            });
+        });
+    </script>
 }

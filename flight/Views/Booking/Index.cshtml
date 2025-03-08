@@ -8,13 +8,21 @@
 
 <form id="flightSearchForm" method="post">
     <div class="row">
+        <div class="col-md-2">
+            <label for="tripType">Trip Type:</label>
+            <select class="form-control" id="tripType" name="tripType" required>
+                <option value="oneway">One Way</option>
+                <option value="roundtrip">Round Trip</option>
+            </select>
+        </div>
+
         <div class="col-md-3">
             <label for="departureAirport">Departure Airport:</label>
             <select class="form-control" id="departureAirport" name="departureAirportId" required>
                 <option value="">Select Airport</option>
                 @foreach (var airport in Model ?? new List<flight.Models.Airport>())
                 {
-                    <option value="@airport.Id">@airport.Name</option>
+                        <option value="@airport.Id">@airport.Name</option>
                 }
             </select>
         </div>
@@ -25,38 +33,67 @@
                 <option value="">Select Airport</option>
                 @foreach (var airport in Model ?? new List<flight.Models.Airport>())
                 {
-                    <option value="@airport.Id">@airport.Name</option>
+                        <option value="@airport.Id">@airport.Name</option>
                 }
             </select>
         </div>
 
-        <div class="col-md-3">
+        <div class="col-md-2">
             <label for="departureDate">Departure Date:</label>
             <input type="date" class="form-control" id="departureDate" name="departureDate" required>
         </div>
 
-        <div class="col-md-3 d-flex align-items-end">
+        <div class="col-md-2" id="returnDateContainer" style="display: none;">
+            <label for="returnDate">Return Date:</label>
+            <input type="date" class="form-control" id="returnDate" name="returnDate">
+        </div>
+
+        <div class="col-md-2">
+            <label for="numberOfAdults">Adults:</label>
+            <input type="number" class="form-control" id="numberOfAdults" name="numberOfAdults" min="1" max="10" required>
+        </div>
+
+        <div class="col-md-2">
+            <label for="numberOfChildren">Children:</label>
+            <input type="number" class="form-control" id="numberOfChildren" name="numberOfChildren" min="0" max="10" required>
+        </div>
+
+        <div class="col-md-2 d-flex align-items-end">
             <button type="submit" class="btn btn-primary w-100">Search Flights</button>
         </div>
     </div>
 </form>
 
+
+
 <div id="flightResults" class="mt-4"></div>
 
 @section Scripts {
-    <script>
-        $(document).ready(function () {
-            $("#flightSearchForm").submit(function (e) {
-                e.preventDefault();
-                $.ajax({
-                    url: "@Url.Action("SearchFlights", "Booking")",
-                    type: "POST",
-                    data: $(this).serialize(),
-                    success: function (result) {
-                        $("#flightResults").html(result);
+        <script>
+            $(document).ready(function () {
+                // Show/hide return date based on trip type
+                $("#tripType").change(function () {
+                    if ($(this).val() === "roundtrip") {
+                        $("#returnDateContainer").show();
+                        $("#returnDate").attr("required", true);
+                    } else {
+                        $("#returnDateContainer").hide();
+                        $("#returnDate").attr("required", false);
                     }
                 });
+
+                // Submit form via AJAX
+                $("#flightSearchForm").submit(function (e) {
+                    e.preventDefault();
+                    $.ajax({
+                        url: "@Url.Action("SearchFlights", "Booking")",
+                        type: "POST",
+                        data: $(this).serialize(),
+                        success: function (result) {
+                            $("#flightResults").html(result);
+                        }
+                    });
+                });
             });
-        });
-    </script>
+        </script>
 }

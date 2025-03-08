@@ -13,6 +13,8 @@ namespace flight.Data
         public DbSet<Booking> Bookings { get; set; }
 
 
+
+
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
         protected override void OnModelCreating(ModelBuilder builder)
@@ -37,6 +39,14 @@ namespace flight.Data
                 .WithMany()
                 .HasForeignKey(f => f.ArrivalAirportId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+        
+            builder.Entity<Booking>()
+                .HasMany(b => b.Guests)
+                .WithOne()
+                .HasForeignKey(g => g.BookingId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
-}
+    }
+
