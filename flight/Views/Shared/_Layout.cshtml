@@ -1,5 +1,4 @@
-﻿﻿
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -10,20 +9,16 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.5/font/bootstrap-icons.min.css">
 </head>
 <body>
-    <div class="d-flex flex-column" id="wrapper">
+    <div class="d-flex" id="wrapper">
         <!-- Sidebar -->
         <div class="bg-dark text-white sidebar" id="sidebar-wrapper">
-            <!-- Sidebar Toggle Button - Moved to Top -->
-            <button class="btn btn-sm btn-light sidebar-toggle" id="sidebar-toggle"><i class="bi bi-list"></i></button>
+            <button class="btn btn-sm btn-light sidebar-toggle" id="sidebar-toggle">
+                <i class="bi bi-list"></i>
+            </button>
 
             <div class="sidebar-header">
                 <span class="fs-4 fw-bold sidebar-title"><i class="bi bi-airplane"></i> AirVista</span>
             </div>
-
-
-
-
-
 
             @if (User.IsInRole("Admin"))
             {
@@ -53,17 +48,13 @@
                 <a href="@Url.Action("Index", "Booking")" class="list-group-item list-group-item-action bg-dark text-white">
                     <i class="bi bi-person"></i> <span>User Dashboard</span>
                 </a>
-
             }
 
-
-                <form id="logoutForm" asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
-                    <button type="submit" class="list-group-item list-group-item-action bg-dark text-danger border-0" style="background: none; color: red;">
-                        <i class="bi bi-box-arrow-right"></i> <span>Logout</span>
-                    </button>
-                </form>
-
-            </div>
+            <form id="logoutForm" asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                <button type="submit" class="list-group-item list-group-item-action bg-dark text-danger border-0">
+                    <i class="bi bi-box-arrow-right"></i> <span>Logout</span>
+                </button>
+            </form>
         </div>
 
         <!-- Page Content -->

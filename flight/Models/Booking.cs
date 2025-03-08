@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace flight.Models
@@ -21,11 +22,20 @@ namespace flight.Models
         public string SeatClass { get; set; } // Business, Economy, First Class
 
         [Required]
-        public int NumberOfSeats { get; set; }
+        public int NumberOfAdults { get; set; } // Number of adult passengers
+
+        [Required]
+        public int NumberOfChildren { get; set; } // Number of child passengers
 
         [Column(TypeName = "decimal(18,2)")]
-        public decimal TotalPrice { get; set; }
+        public decimal TotalPrice { get; set; } // Automatically calculated based on seat selection
 
+
+
+        [Required]
+        public DateTime DepartureDate { get; set; } // Selected departure date
+
+        public DateTime? ReturnDate { get; set; } // Optional return date for round-trip bookings
 
         public DateTime BookingDate { get; set; } = DateTime.UtcNow;
 

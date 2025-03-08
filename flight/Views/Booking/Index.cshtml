@@ -1,0 +1,62 @@
+﻿@model IEnumerable<flight.Models.Airport>
+
+@{
+    ViewData["Title"] = "Search Flights";
+}
+
+<h2>Search Flights</h2>
+
+<form id="flightSearchForm" method="post">
+    <div class="row">
+        <div class="col-md-3">
+            <label for="departureAirport">Departure Airport:</label>
+            <select class="form-control" id="departureAirport" name="departureAirportId" required>
+                <option value="">Select Airport</option>
+                @foreach (var airport in Model ?? new List<flight.Models.Airport>())
+                {
+                    <option value="@airport.Id">@airport.Name</option>
+                }
+            </select>
+        </div>
+
+        <div class="col-md-3">
+            <label for="arrivalAirport">Arrival Airport:</label>
+            <select class="form-control" id="arrivalAirport" name="arrivalAirportId" required>
+                <option value="">Select Airport</option>
+                @foreach (var airport in Model ?? new List<flight.Models.Airport>())
+                {
+                    <option value="@airport.Id">@airport.Name</option>
+                }
+            </select>
+        </div>
+
+        <div class="col-md-3">
+            <label for="departureDate">Departure Date:</label>
+            <input type="date" class="form-control" id="departureDate" name="departureDate" required>
+        </div>
+
+        <div class="col-md-3 d-flex align-items-end">
+            <button type="submit" class="btn btn-primary w-100">Search Flights</button>
+        </div>
+    </div>
+</form>
+
+<div id="flightResults" class="mt-4"></div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $("#flightSearchForm").submit(function (e) {
+                e.preventDefault();
+                $.ajax({
+                    url: "@Url.Action("SearchFlights", "Booking")",
+                    type: "POST",
+                    data: $(this).serialize(),
+                    success: function (result) {
+                        $("#flightResults").html(result);
+                    }
+                });
+            });
+        });
+    </script>
+}

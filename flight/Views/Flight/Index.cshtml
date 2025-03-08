@@ -75,7 +75,7 @@
                                                 data-economyprice="@flight.EconomyClassPrice"
                                                 data-firstclassseats="@flight.FirstClassSeatsAvailable"
                                                 data-firstclassprice="@flight.FirstClassPrice"
-                                                data-ticketprice="@flight.TicketPrice" 
+                                                
                                                 data-status="@flight.Status">
                                             <i class="fas fa-edit"></i> Edit
                                         </button>
@@ -176,10 +176,7 @@
                             <input type="number" id="editFirstClassPrice" name="FirstClassPrice" step="0.01" class="form-control" required />
                         </div>
 
-                        <div class="col-md-6">
-                            <label class="form-label">Ticket Price</label>
-                            <input type="number" id="editTicketPrice" name="TicketPrice" step="0.01" class="form-control" required />
-                        </div>
+                        
 
                         <div class="col-md-12">
                             <label class="form-label">Status</label>
@@ -271,7 +268,7 @@
                     document.querySelector("#editEconomyPrice").value = this.getAttribute("data-economyprice") || "0.00";
                     document.querySelector("#editFirstClassSeats").value = this.getAttribute("data-firstclassseats") || "0";
                     document.querySelector("#editFirstClassPrice").value = this.getAttribute("data-firstclassprice") || "0.00";
-                    document.querySelector("#editTicketPrice").value = this.getAttribute("data-ticketprice") || "0.00"; // Add this line
+                  
                     document.querySelector("#editStatus").value = this.getAttribute("data-status") || "Scheduled";
                 });
             });
