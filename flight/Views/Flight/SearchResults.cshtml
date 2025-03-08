@@ -1,0 +1,65 @@
+﻿@model IEnumerable<flight.Models.Flight>
+
+@{
+    ViewData["Title"] = "Search Results";
+}
+
+<div class="container mt-4">
+    <h2 class="mb-4">Search Results</h2>
+
+    @if (Model.Any())
+    {
+        <div class="table-responsive">
+            <table class="table table-hover shadow">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>Airline</th>
+                        <th>Departure</th>
+                        <th>Arrival</th>
+                        <th>Status</th>
+                        <th>Fare</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var flight in Model)
+                    {
+                        var flightStatus = flight.DepartureDateTime > DateTime.Now ? "Not Yet Departed" : "Departed";
+                        var statusClass = flightStatus == "Not Yet Departed" ? "badge-warning" : "badge-success";
+
+                        <tr>
+                            <td>@flight.Airline.Name</td>
+                            <td>@flight.DepartureDateTime.ToString("yyyy-MM-dd HH:mm")</td>
+                            <td>@flight.EstimatedArrivalDateTime.ToString("yyyy-MM-dd HH:mm")</td>
+                            <td>
+                                <span class="badge @statusClass">@flightStatus</span>
+                            </td>
+                            <td><strong>$@flight.TicketPrice</strong></td>
+                            <td>
+                                <form asp-action="BookingSummary" method="get" class="d-flex align-items-center">
+                                    <input type="hidden" name="flightId" value="@flight.Id" />
+                                    <input type="hidden" name="seatType" value="Economy" />
+
+                                    <div class="mr-2">
+                                        <label class="small mb-0">Adults</label>
+                                        <input type="number" name="numberOfAdults" value="1" min="1" class="form-control form-control-sm" />
+                                    </div>
+                                    <div class="mr-2">
+                                        <label class="small mb-0">Children</label>
+                                        <input type="number" name="numberOfChildren" value="0" min="0" class="form-control form-control-sm" />
+                                    </div>
+
+                                    <button type="submit" class="btn btn-warning btn-sm">Book</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info">No flights found for the selected criteria.</div>
+    }
+</div>

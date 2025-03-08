@@ -1,5 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace flight.Models
 {
@@ -8,27 +8,39 @@ namespace flight.Models
         public int Id { get; set; }
 
         [Required]
-        [ForeignKey("Flight")]
         public int FlightId { get; set; }
+
         public Flight? Flight { get; set; }
 
         [Required]
-        [ForeignKey("Users")]
-        public string UserId { get; set; }
-        public Users? User { get; set; }
+        public string SeatType { get; set; } // "Economy", "Business", "FirstClass"
 
         [Required]
-        public string SeatClass { get; set; } // Business, Economy, First Class
+        public int NumberOfAdults { get; set; }
 
         [Required]
-        public int NumberOfSeats { get; set; }
+        public int NumberOfChildren { get; set; }
 
-        [Column(TypeName = "decimal(18,2)")]
-        public decimal TotalPrice { get; set; }
-
-
+        [Required]
         public DateTime BookingDate { get; set; } = DateTime.UtcNow;
 
-        public string Status { get; set; } = "Pending"; // Pending, Confirmed, Cancelled
+        public decimal TotalPrice { get; set; }
+
+        public void CalculateTotalPrice()
+        {
+            if (Flight == null) return;
+
+            decimal adultPrice = SeatType switch
+            {
+                "Economy" => Flight.EconomyClassPrice,
+                "Business" => Flight.BusinessClassPrice,
+                "FirstClass" => Flight.FirstClassPrice,
+                _ => 0
+            };
+
+            decimal childPrice = adultPrice * 0.75m; // Assuming children get a 25% discount
+
+            TotalPrice = (NumberOfAdults * adultPrice) + (NumberOfChildren * childPrice);
+        }
     }
 }

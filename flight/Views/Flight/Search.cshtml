@@ -1,0 +1,47 @@
+﻿@model flight.Models.Flight
+
+@{
+    ViewData["Title"] = "Search Flights";
+}
+
+<h2>Search Flights</h2>
+
+<form asp-action="Search" asp-controller="Flight" method="post">
+    <div>
+        <label>Departure Airport</label>
+        <select name="departureAirportId" asp-items="ViewBag.DepartureAirports"></select>
+    </div>
+    <div>
+        <label>Arrival Airport</label>
+        <select name="arrivalAirportId" asp-items="ViewBag.ArrivalAirports"></select>
+    </div>
+    <div>
+        <label>Departure Date</label>
+        <input type="date" name="departureDate" required />
+    </div>
+    <div>
+        <label>Trip Type</label>
+        <select name="tripType">
+            <option value="OneWay">One Way</option>
+            <option value="RoundTrip">Round Trip</option>
+        </select>
+    </div>
+    <div id="returnDateGroup" style="display:none;">
+        <label>Return Date</label>
+        <input type="date" name="returnDate" />
+    </div>
+    <button type="submit">Search</button>
+</form>
+
+@section Scripts {
+    <script>
+        document.querySelector('select[name="tripType"]').addEventListener('change', function () {
+            var returnDateGroup = document.getElementById('returnDateGroup');
+            if (this.value === 'RoundTrip') {
+                returnDateGroup.style.display = 'block';
+            } else {
+                returnDateGroup.style.display = 'none';
+            }
+        });
+    </script>
+}

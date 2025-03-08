@@ -39,6 +39,11 @@ namespace flight.Models
         public DateTime EstimatedArrivalDateTime { get; set; }
 
         [Required]
+        public string TripType { get; set; } = "OneWay"; // "OneWay" or "RoundTrip"
+
+        public DateTime? ReturnDateTime { get; set; } // Nullable for one-way trips
+
+        [Required]
         public int BusinessSeatsAvailable { get; set; }
 
         [Required]

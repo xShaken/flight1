@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace flight.Migrations
 {
     /// <inheritdoc />
-    public partial class Flight : Migration
+    public partial class Booking : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -91,12 +91,22 @@ namespace flight.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     FlightNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     AirlineId = table.Column<int>(type: "int", nullable: false),
+                    AircraftCode = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     DepartureAirportId = table.Column<int>(type: "int", nullable: false),
                     ArrivalAirportId = table.Column<int>(type: "int", nullable: false),
-                    DepartureTime = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    ArrivalTime = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Status = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    DateAdded = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    DepartureDateTime = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    EstimatedArrivalDateTime = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    TripType = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ReturnDateTime = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    BusinessSeatsAvailable = table.Column<int>(type: "int", nullable: false),
+                    BusinessClassPrice = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    EconomySeatsAvailable = table.Column<int>(type: "int", nullable: false),
+                    EconomyClassPrice = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    FirstClassSeatsAvailable = table.Column<int>(type: "int", nullable: false),
+                    FirstClassPrice = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    TicketPrice = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    DateAdded = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Status = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -227,6 +237,30 @@ namespace flight.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "Bookings",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    FlightId = table.Column<int>(type: "int", nullable: false),
+                    SeatType = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    NumberOfAdults = table.Column<int>(type: "int", nullable: false),
+                    NumberOfChildren = table.Column<int>(type: "int", nullable: false),
+                    BookingDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    TotalPrice = table.Column<decimal>(type: "decimal(18,2)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Bookings", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Bookings_Flights_FlightId",
+                        column: x => x.FlightId,
+                        principalTable: "Flights",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
                 table: "AspNetRoleClaims",
@@ -267,6 +301,11 @@ namespace flight.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Bookings_FlightId",
+                table: "Bookings",
+                column: "FlightId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Flights_AirlineId",
                 table: "Flights",
                 column: "AirlineId");
@@ -301,13 +340,16 @@ namespace flight.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "Flights");
+                name: "Bookings");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
+
+            migrationBuilder.DropTable(
+                name: "Flights");
 
             migrationBuilder.DropTable(
                 name: "Airlines");

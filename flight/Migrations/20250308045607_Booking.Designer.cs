@@ -12,8 +12,8 @@ using flight.Data;
 namespace flight.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250301082345_Update")]
-    partial class Update
+    [Migration("20250308045607_Booking")]
+    partial class Booking
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -214,6 +214,40 @@ namespace flight.Migrations
                     b.ToTable("Airports");
                 });
 
+            modelBuilder.Entity("flight.Models.Booking", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("BookingDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("FlightId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("NumberOfAdults")
+                        .HasColumnType("int");
+
+                    b.Property<int>("NumberOfChildren")
+                        .HasColumnType("int");
+
+                    b.Property<string>("SeatType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("TotalPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FlightId");
+
+                    b.ToTable("Bookings");
+                });
+
             modelBuilder.Entity("flight.Models.Flight", b =>
                 {
                     b.Property<int>("Id")
@@ -266,7 +300,17 @@ namespace flight.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateTime?>("ReturnDateTime")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("TicketPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("TripType")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -399,6 +443,17 @@ namespace flight.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("flight.Models.Booking", b =>
+                {
+                    b.HasOne("flight.Models.Flight", "Flight")
+                        .WithMany()
+                        .HasForeignKey("FlightId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Flight");
                 });
 
             modelBuilder.Entity("flight.Models.Flight", b =>

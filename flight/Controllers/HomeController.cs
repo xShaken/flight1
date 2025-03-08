@@ -40,7 +40,7 @@ namespace flight.Controllers
         {
             return View();
         }
-
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Dashboard()
         {
             var flights = await _context.Flights
@@ -54,7 +54,7 @@ namespace flight.Controllers
 
             return View(flights);
         }
-
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> UpdateStatus(int id, int? delayMinutes, string status)
         {
@@ -80,7 +80,7 @@ namespace flight.Controllers
 
             return RedirectToAction("Dashboard");
         }
-
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> ResolveIssue(int id)
         {
@@ -96,7 +96,7 @@ namespace flight.Controllers
 
             return RedirectToAction("Dashboard");
         }
-
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> MarkAsArrived(int id)
         {
@@ -112,18 +112,18 @@ namespace flight.Controllers
 
             return RedirectToAction("Dashboard");
         }
-
+        [Authorize(Roles = "Admin")]
         public IActionResult Flights()
         {
             return View();
         }
-
+        [Authorize(Roles = "Admin")]
         public IActionResult Airlines()
         {
             var airlines = _context.Airlines.ToList();
             return View(airlines);
         }
-
+        [Authorize(Roles = "Admin")]
         public IActionResult Airports()
         {
             var airports = _context.Airports.ToList();
@@ -143,7 +143,7 @@ namespace flight.Controllers
                 .Select(a => new SelectListItem { Value = a.Id.ToString(), Text = a.Name })
                 .ToList();
 
-            return View("~/Views/Users/Index.cshtml");
+            return View("~/Views/Flight/Search.cshtml");
         }
     }
 }

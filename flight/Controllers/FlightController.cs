@@ -52,11 +52,16 @@ namespace flight.Controllers
         // Handle flight creation
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("FlightNumber,AirlineId,AircraftCode,DepartureAirportId,ArrivalAirportId,DepartureDateTime,EstimatedArrivalDateTime,BusinessSeatsAvailable,BusinessClassPrice,EconomySeatsAvailable,EconomyClassPrice,FirstClassSeatsAvailable,FirstClassPrice,TicketPrice")] Flight flight)
+        public async Task<IActionResult> Create([Bind("FlightNumber,AirlineId,AircraftCode,DepartureAirportId,ArrivalAirportId,DepartureDateTime,EstimatedArrivalDateTime,BusinessSeatsAvailable,BusinessClassPrice,EconomySeatsAvailable,EconomyClassPrice,FirstClassSeatsAvailable,FirstClassPrice,TicketPrice,TripType,ReturnDateTime")] Flight flight)
         {
             if (flight.DepartureDateTime >= flight.EstimatedArrivalDateTime)
             {
                 ModelState.AddModelError("EstimatedArrivalDateTime", "Arrival time must be after departure time.");
+            }
+
+            if (flight.TripType == "RoundTrip" && flight.ReturnDateTime <= flight.EstimatedArrivalDateTime)
+            {
+                ModelState.AddModelError("ReturnDateTime", "Return date must be after the arrival time.");
             }
 
             if (!ModelState.IsValid)
@@ -192,21 +197,63 @@ namespace flight.Controllers
             ViewBag.Airports = new SelectList(await _context.Airports.ToListAsync(), "Id", "Name");
         }
 
-        [HttpGet]
-        public async Task<IActionResult> SearchFlights(int from, int to, DateTime departureDate)
+        public async Task<IActionResult> Search()
+        {
+            await PopulateDropdowns();
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Search(int departureAirportId, int arrivalAirportId, DateTime departureDate, string tripType, DateTime? returnDate)
         {
             var flights = await _context.Flights
                 .Include(f => f.Airline)
                 .Include(f => f.DepartureAirport)
                 .Include(f => f.ArrivalAirport)
-                .Where(f => f.DepartureAirportId == from
-                            && f.ArrivalAirportId == to
+                .Where(f => f.DepartureAirportId == departureAirportId
+                            && f.ArrivalAirportId == arrivalAirportId
                             && f.DepartureDateTime.Date == departureDate.Date
+                            && f.TripType == tripType
                             && f.Status == "Scheduled")
                 .ToListAsync();
 
-            return PartialView("_FlightResults", flights); // Return partial view for AJAX update
+            if (tripType == "RoundTrip" && returnDate.HasValue)
+            {
+                flights = flights.Where(f => f.ReturnDateTime.HasValue && f.ReturnDateTime.Value.Date == returnDate.Value.Date).ToList();
+            }
+
+            ViewBag.TripType = tripType;
+            return View("SearchResults", flights); // Pass the list of flights to the view
         }
 
+        // Show the booking summary
+        public IActionResult BookingSummary(int flightId, string seatType, int numberOfAdults, int numberOfChildren)
+        {
+            var flight = _context.Flights
+                .Include(f => f.DepartureAirport)
+                .Include(f => f.ArrivalAirport)
+                .FirstOrDefault(f => f.Id == flightId);
+
+            if (flight == null)
+            {
+                return NotFound();
+            }
+
+            var booking = new Booking
+            {
+                FlightId = flightId,
+                SeatType = seatType,
+                NumberOfAdults = numberOfAdults,
+                NumberOfChildren = numberOfChildren,
+                Flight = flight
+            };
+
+            booking.CalculateTotalPrice();
+
+            return View(booking);
+        }
+
+        // Populate Airlines & Airports dropdowns
+       
     }
 }

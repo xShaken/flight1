@@ -38,9 +38,9 @@
                 <label>From</label>
                 <select class="form-control" id="from" name="from">
                     <option value="">Select Departure</option>
-                    @foreach (var airport in ViewBag.DepartureAirports)
+                    @foreach (var airport in ViewBag.Airports)
                     {
-                        <option value="@airport.Value">@airport.Text</option>
+                        <option value="@airport.Id">@airport.Name</option>
                     }
                 </select>
             </div>
@@ -48,19 +48,19 @@
                 <label>To</label>
                 <select class="form-control" id="to" name="to">
                     <option value="">Select Destination</option>
-                    @foreach (var airport in ViewBag.ArrivalAirports)
+                    @foreach (var airport in ViewBag.Airports)
                     {
-                        <option value="@airport.Value">@airport.Text</option>
+                        <option value="@airport.Id">@airport.Name</option>
                     }
                 </select>
             </div>
             <div class="form-group">
                 <label>Depart</label>
-                <input type="date" class="form-control" name="depart">
+                <input type="date" class="form-control" id="depart" name="depart">
             </div>
             <div class="form-group">
                 <label>Return</label>
-                <input type="date" class="form-control" name="return" id="returnDate">
+                <input type="date" class="form-control" id="returnDate" name="return">
             </div>
             <button class="btn btn-primary search-btn">Search Flights</button>
         </div>
@@ -74,17 +74,26 @@
 
 <script>
     $(document).ready(function () {
-        $(".search-btn").click(function (e) {  // ✅ Corrected button selector
+        $(".search-btn").click(function (e) {
             e.preventDefault();  // Prevents page reload
 
             var from = $("#from").val();
             var to = $("#to").val();
+            var depart = $("#depart").val();
+            var returnDate = $("#returnDate").val();
+            var tripType = $("#tripType").val();
 
-            if (from && to) {
+            if (from && to && depart) {
                 $.ajax({
-                    url: '/Flight/SearchFlights',
-                    type: 'GET',
-                    data: { from: from, to: to },
+                    url: '/Booking/Search',
+                    type: 'POST',
+                    data: {
+                        from: from,
+                        to: to,
+                        departureDate: depart,
+                        returnDate: returnDate,
+                        tripType: tripType
+                    },
                     success: function (data) {
                         $("#flightResults").html(data);
                     },
@@ -93,11 +102,12 @@
                     }
                 });
             } else {
-                alert("Please select both departure and destination.");
+                alert("Please select departure, destination, and departure date.");
             }
         });
     });
-        function toggleReturnDate() {
+
+    function toggleReturnDate() {
         var tripType = document.getElementById("tripType").value;
         var returnDate = document.getElementById("returnDate");
 
@@ -108,5 +118,4 @@
             returnDate.disabled = false;
         }
     }
-
 </script>

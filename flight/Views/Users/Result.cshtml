@@ -1,0 +1,54 @@
+﻿@model IEnumerable<flight.Models.Flight>
+
+@{
+    ViewData["Title"] = "Flight Results";
+    Layout = "~/Views/Shared/_UserLayout.cshtml";
+}
+
+<h2>Flight Results</h2>
+
+@if (Model.Any())
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Airline</th>
+                <th>Departure</th>
+                <th>Arrival</th>
+                <th>Status</th>
+                <th>Fare</th>
+                <th>Buy</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var flight in Model)
+            {
+                <tr>
+                    <td>@flight.Airline.Name</td>
+                    <td>@flight.DepartureDateTime.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                    <td>@flight.EstimatedArrivalDateTime.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                    <td>@flight.Status</td>
+                    <td>
+                        @flight.EconomyClassPrice.ToString("C") - @flight.FirstClassPrice.ToString("C")
+                    </td>
+                    <td>
+                        <button class="btn btn-primary book-btn" data-flight-id="@flight.Id">Buy</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>No flights found.</p>
+}
+
+<script>
+    $(document).ready(function () {
+        $(".book-btn").click(function () {
+            var flightId = $(this).data("flight-id");
+            window.location.href = `/Booking/Book?flightId=${flightId}`;
+        });
+    });
+</script>

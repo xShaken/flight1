@@ -1,84 +1,107 @@
 ﻿using flight.Data;
 using flight.Models;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace flight.Controllers
 {
-    [Authorize] // Only authenticated users can access booking
-    public class BookingsController : Controller
+    public class BookingController : Controller
     {
         private readonly AppDbContext _context;
-        private readonly UserManager<Users> _userManager;
 
-        public BookingsController(AppDbContext context, UserManager<Users> userManager)
+        public BookingController(AppDbContext context)
         {
             _context = context;
-            _userManager = userManager;
         }
-
 
         public async Task<IActionResult> Index()
         {
-            ViewBag.DepartureAirports = await _context.Airports
-                .Select(a => new { Value = a.Id, Text = a.Name })
-                .ToListAsync();
-
-            ViewBag.ArrivalAirports = ViewBag.DepartureAirports; // Assuming same list for both
-
+            ViewBag.Airports = await _context.Airports.ToListAsync();
             return View("~/Views/Users/Index.cshtml");
         }
 
-
-        // Display Booking Form
-        public IActionResult Create()
-        {
-            return View();
-        }
-
-        // Handle Booking Submission
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> BookFlight(Booking booking)
+        public async Task<IActionResult> Search(int from, int to, DateTime departureDate, DateTime? returnDate, string tripType)
         {
-            if (ModelState.IsValid)
+            var flights = await _context.Flights
+                .Include(f => f.Airline)
+                .Include(f => f.DepartureAirport)
+                .Include(f => f.ArrivalAirport)
+                .Where(f => f.DepartureAirportId == from
+                            && f.ArrivalAirportId == to
+                            && f.DepartureDateTime.Date == departureDate.Date
+                            && f.Status == "Scheduled")
+                .ToListAsync();
+
+            if (tripType == "RoundTrip" && returnDate.HasValue)
             {
-                var user = await _userManager.GetUserAsync(User);
-
-                if (user != null)
-                {
-                    booking.UserId = user.Id;
-                    booking.TotalPrice = booking.NumberOfSeats * 1500; // Example price calculation
-                    booking.BookingDate = DateTime.Now;
-
-                    _context.Bookings.Add(booking);
-                    await _context.SaveChangesAsync();
-
-                    TempData["Success"] = "Flight Booked Successfully!";
-                    return RedirectToAction("UserBookings");
-                }
-            }
-            TempData["Error"] = "Failed to book flight!";
-            return View("Create", booking);
-        }
-
-        // Show List of User Bookings
-        public async Task<IActionResult> UserBookings()
-        {
-            var user = await _userManager.GetUserAsync(User);
-
-            if (user != null)
-            {
-                var bookings = await _context.Bookings
-                    .Where(b => b.UserId == user.Id)
+                var returnFlights = await _context.Flights
+                    .Include(f => f.Airline)
+                    .Include(f => f.DepartureAirport)
+                    .Include(f => f.ArrivalAirport)
+                    .Where(f => f.DepartureAirportId == to
+                                && f.ArrivalAirportId == from
+                                && f.DepartureDateTime.Date == returnDate.Value.Date
+                                && f.Status == "Scheduled")
                     .ToListAsync();
 
-                return View(bookings);
+                ViewBag.ReturnFlights = returnFlights;
             }
 
-            return RedirectToAction("Login", "Account");
+            ViewBag.TripType = tripType;
+            ViewBag.DepartureDate = departureDate;
+            ViewBag.ReturnDate = returnDate;
+
+            return View("~/Views/Users/Result.cshtml", flights);
+        }
+
+        public async Task<IActionResult> Book(int flightId, string seatType, int numberOfAdults, int numberOfChildren, int? returnFlightId)
+        {
+            var flight = await _context.Flights
+                .Include(f => f.DepartureAirport)
+                .Include(f => f.ArrivalAirport)
+                .FirstOrDefaultAsync(f => f.Id == flightId);
+
+            if (flight == null)
+            {
+                return NotFound();
+            }
+
+            var booking = new Booking
+            {
+                FlightId = flightId,
+                SeatType = seatType,
+                NumberOfAdults = numberOfAdults,
+                NumberOfChildren = numberOfChildren
+            };
+
+            booking.CalculateTotalPrice();
+
+            if (returnFlightId.HasValue)
+            {
+                var returnFlight = await _context.Flights
+                    .Include(f => f.DepartureAirport)
+                    .Include(f => f.ArrivalAirport)
+                    .FirstOrDefaultAsync(f => f.Id == returnFlightId.Value);
+
+                if (returnFlight != null)
+                {
+                    var returnBooking = new Booking
+                    {
+                        FlightId = returnFlightId.Value,
+                        SeatType = seatType,
+                        NumberOfAdults = numberOfAdults,
+                        NumberOfChildren = numberOfChildren
+                    };
+
+                    returnBooking.CalculateTotalPrice();
+                    booking.TotalPrice += returnBooking.TotalPrice;
+                }
+            }
+
+            return View("BookingSummary", booking);
         }
     }
 }

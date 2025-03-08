@@ -225,29 +225,22 @@ namespace flight.Migrations
                     b.Property<int>("FlightId")
                         .HasColumnType("int");
 
-                    b.Property<int>("NumberOfSeats")
+                    b.Property<int>("NumberOfAdults")
                         .HasColumnType("int");
 
-                    b.Property<string>("SeatClass")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("NumberOfChildren")
+                        .HasColumnType("int");
 
-                    b.Property<string>("Status")
+                    b.Property<string>("SeatType")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("TotalPrice")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
                     b.HasKey("Id");
 
                     b.HasIndex("FlightId");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("Bookings");
                 });
@@ -304,12 +297,19 @@ namespace flight.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateTime?>("ReturnDateTime")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("TicketPrice")
                         .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("TripType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -450,15 +450,7 @@ namespace flight.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("flight.Models.Users", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("Flight");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("flight.Models.Flight", b =>

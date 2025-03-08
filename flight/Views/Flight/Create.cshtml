@@ -12,6 +12,23 @@
         <div class="card-body">
             <form asp-action="Create" method="post" class="needs-validation" novalidate onsubmit="return validateAirports()">
                 <div class="row g-3">
+                    <!-- Trip Type -->
+                    <div class="col-md-6">
+                        <label asp-for="TripType" class="form-label">Trip Type</label>
+                        <select asp-for="TripType" class="form-select" id="TripType" required>
+                            <option value="OneWay">One Way</option>
+                            <option value="RoundTrip">Round Trip</option>
+                        </select>
+                        <span asp-validation-for="TripType" class="text-danger"></span>
+                    </div>
+
+                    <!-- Return Date (hidden by default) -->
+                    <div class="col-md-6" id="ReturnDateField" style="display: none;">
+                        <label asp-for="ReturnDateTime" class="form-label">Return Date</label>
+                        <input asp-for="ReturnDateTime" type="datetime-local" class="form-control" />
+                        <span asp-validation-for="ReturnDateTime" class="text-danger"></span>
+                    </div>
+
                     <!-- Flight Number -->
                     <div class="col-md-6">
                         <label asp-for="FlightNumber" class="form-label">Flight Number</label>
@@ -141,5 +158,15 @@
             }
             return true; // Allow form submission
         }
+
+        // Show/hide return date field based on trip type
+        document.getElementById("TripType").addEventListener("change", function () {
+            const returnDateField = document.getElementById("ReturnDateField");
+            if (this.value === "RoundTrip") {
+                returnDateField.style.display = "block";
+            } else {
+                returnDateField.style.display = "none";
+            }
+        });
     </script>
 }
