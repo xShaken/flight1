@@ -1,41 +1,313 @@
-﻿@model flight.Models.FlightSelectionViewModel
+﻿@model flight.ViewModels.FlightSelectionViewModel
+@{
+    ViewData["Title"] = "Guest Information";
+}
 
-<h2>Guest Information</h2>
-
-<form method="post" action="@Url.Action("ConfirmBooking", "Booking")">
-    <input type="hidden" name="departureFlightId" value="@Model.DepartureFlight.Id" />
-    <input type="hidden" name="returnFlightId" value="@(Model.ReturnFlight?.Id ?? 0)" />
-    <input type="hidden" name="seatClass" value="@Model.SeatClass" />
-    <input type="hidden" name="numberOfAdults" value="@Model.NumberOfAdults" />
-    <input type="hidden" name="numberOfChildren" value="@Model.NumberOfChildren" />
-
-    @for (int i = 0; i < Model.NumberOfAdults; i++)
-    {
-        <h3>Adult @(i + 1)</h3>
-        <div class="form-group">
-            <label for="adultFirstName_@i">First Name:</label>
-            <input type="text" class="form-control" id="adultFirstName_@i" name="guests[@i].FirstName" required>
+<div class="container">
+    <h2>Guest Information</h2>
+    <div class="card mb-4">
+        <div class="card-header">
+            <h3>Your Selected Flights</h3>
         </div>
-        <div class="form-group">
-            <label for="adultLastName_@i">Last Name:</label>
-            <input type="text" class="form-control" id="adultLastName_@i" name="guests[@i].LastName" required>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>Departure Flight</h5>
+                    <p>
+                        <strong>From:</strong> @Model.DepartureFlight.DepartureAirport.Name<br />
+                        <strong>To:</strong> @Model.DepartureFlight.ArrivalAirport.Name<br />
+                        <strong>Date:</strong> @Model.DepartureFlight.DepartureDateTime.ToShortDateString()<br />
+                        <strong>Time:</strong> @Model.DepartureFlight.DepartureDateTime.ToString("hh:mm tt") - @Model.DepartureFlight.EstimatedArrivalDateTime.ToString("hh:mm tt")<br />
+                        <strong>Class:</strong> @Model.SeatClass
+                    </p>
+                </div>
+                @if (Model.ReturnFlight != null)
+                {
+                    <div class="col-md-6">
+                        <h5>Return Flight</h5>
+                        <p>
+                            <strong>From:</strong> @Model.ReturnFlight.DepartureAirport.Name<br />
+                            <strong>To:</strong> @Model.ReturnFlight.ArrivalAirport.Name<br />
+                            <strong>Date:</strong> @Model.ReturnFlight.DepartureDateTime.ToShortDateString()<br />
+                            <strong>Time:</strong> @Model.ReturnFlight.DepartureDateTime.ToString("hh:mm tt") - @Model.ReturnFlight.EstimatedArrivalDateTime.ToString("hh:mm tt")<br />
+                            <strong>Class:</strong> @Model.SeatClass
+                        </p>
+                    </div>
+                }
+            </div>
         </div>
-        <input type="hidden" name="guests[@i].IsChild" value="false" />
-    }
+    </div>
 
-    @for (int i = 0; i < Model.NumberOfChildren; i++)
-    {
-        <h3>Child @(i + 1)</h3>
-        <div class="form-group">
-            <label for="childFirstName_@i">First Name:</label>
-            <input type="text" class="form-control" id="childFirstName_@i" name="guests[@(Model.NumberOfAdults + i)].FirstName" required>
+    <div class="card">
+        <div class="card-header">
+            <h3>Passenger Details</h3>
         </div>
-        <div class="form-group">
-            <label for="childLastName_@i">Last Name:</label>
-            <input type="text" class="form-control" id="childLastName_@i" name="guests[@(Model.NumberOfAdults + i)].LastName" required>
-        </div>
-        <input type="hidden" name="guests[@(Model.NumberOfAdults + i)].IsChild" value="true" />
-    }
+        <div class="card-body">
+            <form asp-controller="Booking" asp-action="Confirmation" method="post">
+                <!-- Hidden fields for required model properties -->
+                <input type="hidden" asp-for="DepartureFlight.Id" />
+                <input type="hidden" asp-for="DepartureFlight.DepartureAirportId" />
+                <input type="hidden" asp-for="DepartureFlight.ArrivalAirportId" />
+                <input type="hidden" asp-for="DepartureFlight.DepartureDateTime" />
+                <input type="hidden" asp-for="DepartureFlight.EstimatedArrivalDateTime" />
 
-    <button type="submit" class="btn btn-primary">Continue</button>
-</form>
+                @if (Model.ReturnFlight != null)
+                {
+                    <input type="hidden" asp-for="ReturnFlight.Id" />
+                    <input type="hidden" asp-for="ReturnFlight.DepartureAirportId" />
+                    <input type="hidden" asp-for="ReturnFlight.ArrivalAirportId" />
+                    <input type="hidden" asp-for="ReturnFlight.DepartureDateTime" />
+                    <input type="hidden" asp-for="ReturnFlight.EstimatedArrivalDateTime" />
+                }
+                else
+                {
+                    <input type="hidden" name="ReturnFlight" value="" />
+                }
+
+                <input type="hidden" asp-for="SeatClass" />
+                <input type="hidden" asp-for="NumberOfAdults" />
+                <input type="hidden" asp-for="NumberOfChildren" />
+                <input type="hidden" asp-for="UserId" value="@(string.IsNullOrEmpty(Model.UserId) ? "guest-" + Guid.NewGuid().ToString() : Model.UserId)" />
+
+                <h4>Adult Passengers (@Model.NumberOfAdults)</h4>
+                @for (int i = 0; i < Model.NumberOfAdults; i++)
+                {
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            Adult Passenger @(i + 1)
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="guests[@i].FirstName" class="form-label">First Name</label>
+                                    <input type="text" class="form-control" id="guests[@i].FirstName" name="guests[@i].FirstName" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="guests[@i].LastName" class="form-label">Last Name</label>
+                                    <input type="text" class="form-control" id="guests[@i].LastName" name="guests[@i].LastName" required>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="guests[@i].DateOfBirth" class="form-label">Date of Birth</label>
+                                    <input type="date" class="form-control" id="guests[@i].DateOfBirth" name="guests[@i].DateOfBirth" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="guests[@i].PassportNumber" class="form-label">Passport/ID Number</label>
+                                    <input type="text" class="form-control" id="guests[@i].PassportNumber" name="guests[@i].PassportNumber" required>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="guests[@i].Email" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="guests[@i].Email" name="guests[@i].Email" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="guests[@i].PhoneNumber" class="form-label">Phone Number</label>
+                                <input type="tel" class="form-control" id="guests[@i].PhoneNumber" name="guests[@i].PhoneNumber" required>
+                            </div>
+                            <input type="hidden" name="guests[@i].IsAdult" value="true">
+                        </div>
+                    </div>
+                }
+
+                @if (Model.NumberOfChildren > 0)
+                {
+                    <h4>Child Passengers (@Model.NumberOfChildren)</h4>
+                    @for (int i = Model.NumberOfAdults; i < Model.NumberOfAdults + Model.NumberOfChildren; i++)
+                    {
+                        <div class="card mb-3">
+                            <div class="card-header">
+                                Child Passenger @(i - Model.NumberOfAdults + 1)
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="guests[@i].FirstName" class="form-label">First Name</label>
+                                        <input type="text" class="form-control" id="guests[@i].FirstName" name="guests[@i].FirstName" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="guests[@i].LastName" class="form-label">Last Name</label>
+                                        <input type="text" class="form-control" id="guests[@i].LastName" name="guests[@i].LastName" required>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="guests[@i].DateOfBirth" class="form-label">Date of Birth</label>
+                                        <input type="date" class="form-control" id="guests[@i].DateOfBirth" name="guests[@i].DateOfBirth" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="guests[@i].PassportNumber" class="form-label">Passport/ID Number</label>
+                                        <input type="text" class="form-control" id="guests[@i].PassportNumber" name="guests[@i].PassportNumber" required>
+                                    </div>
+                                </div>
+                                <input type="hidden" name="guests[@i].IsAdult" value="false">
+                            </div>
+                        </div>
+                    }
+                }
+
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h4>Contact Information</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="sameAsPassenger" checked>
+                            <label class="form-check-label" for="sameAsPassenger">
+                                Same as first adult passenger
+                            </label>
+                        </div>
+                        <div id="contactInfo" style="display: none;">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="contactFirstName" class="form-label">First Name</label>
+                                    <input type="text" class="form-control" id="contactFirstName">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="contactLastName" class="form-label">Last Name</label>
+                                    <input type="text" class="form-control" id="contactLastName">
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="contactEmail" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="contactEmail">
+                            </div>
+                            <div class="mb-3">
+                                <label for="contactPhone" class="form-label">Phone Number</label>
+                                <input type="tel" class="form-control" id="contactPhone">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h4>Price Summary</h4>
+                    </div>
+                    <div class="card-body">
+                        @{
+                            decimal departurePrice = 0;
+                            decimal returnPrice = 0;
+
+                            switch (Model.SeatClass)
+                            {
+                                case "Economy":
+                                    departurePrice = Model.DepartureFlight.EconomyClassPrice;
+                                    returnPrice = Model.ReturnFlight != null ? Model.ReturnFlight.EconomyClassPrice : 0;
+                                    break;
+                                case "Business":
+                                    departurePrice = Model.DepartureFlight.BusinessClassPrice;
+                                    returnPrice = Model.ReturnFlight != null ? Model.ReturnFlight.BusinessClassPrice : 0;
+                                    break;
+                                case "FirstClass":
+                                    departurePrice = Model.DepartureFlight.FirstClassPrice;
+                                    returnPrice = Model.ReturnFlight != null ? Model.ReturnFlight.FirstClassPrice : 0;
+                                    break;
+                            }
+
+                            decimal adultTotal = (departurePrice + returnPrice) * Model.NumberOfAdults;
+                            decimal childTotal = (departurePrice + returnPrice) * 0.75m * Model.NumberOfChildren;
+                            decimal totalPrice = adultTotal + childTotal;
+                        }
+
+                        <table class="table">
+                            <tbody>
+                                <tr>
+                                    <td>Departure Flight (@Model.SeatClass)</td>
+                                    <td>@departurePrice.ToString("C")</td>
+                                </tr>
+                                @if (Model.ReturnFlight != null)
+                                {
+                                    <tr>
+                                        <td>Return Flight (@Model.SeatClass)</td>
+                                        <td>@returnPrice.ToString("C")</td>
+                                    </tr>
+                                }
+                                <tr>
+                                    <td>Adult Passengers (x@(Model.NumberOfAdults))</td>
+                                    <td>@adultTotal.ToString("C")</td>
+                                </tr>
+                                @if (Model.NumberOfChildren > 0)
+                                {
+                                    <tr>
+                                        <td>Child Passengers (x@(Model.NumberOfChildren))</td>
+                                        <td>@childTotal.ToString("C")</td>
+                                    </tr>
+                                }
+                                <tr class="table-active">
+                                    <th>Total Price</th>
+                                    <th>@totalPrice.ToString("C")</th>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h4>Terms and Conditions</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="termsAccepted" name="termsAccepted" required>
+                            <label class="form-check-label" for="termsAccepted">
+                                I accept the <a href="#" data-bs-toggle="modal" data-bs-target="#termsModal">terms and conditions</a>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-primary btn-lg">Continue to Payment</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Terms and Conditions Modal -->
+<div class="modal fade" id="termsModal" tabindex="-1" aria-labelledby="termsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="termsModalLabel">Terms and Conditions</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h6>Booking Terms</h6>
+                <p>
+                    By confirming this booking, you agree to the airline's terms and conditions.
+                    Cancellation fees may apply. Please review the airline's specific policies for details.
+                </p>
+
+                <h6>Passenger Responsibilities</h6>
+                <p>
+                    It is the passenger's responsibility to ensure they have all required travel documents,
+                    including but not limited to passports, visas, and health documentation.
+                </p>
+
+                <h6>Privacy Policy</h6>
+                <p>
+                    Your personal information will be processed in accordance with our privacy policy.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Handle the same as passenger checkbox
+            const sameAsPassengerCheckbox = document.getElementById('sameAsPassenger');
+            const contactInfoDiv = document.getElementById('contactInfo');
+
+            sameAsPassengerCheckbox.addEventListener('change', function() {
+                contactInfoDiv.style.display = this.checked ? 'none' : 'block';
+            });
+        });
+    </script>
+}

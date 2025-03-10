@@ -1,8 +1,33 @@
 ﻿@model flight.Models.FlightSearchResultViewModel
 
+<style>
+    .selected-flight {
+        background-color: #d1f7c4 !important;
+    }
+
+    .flight-card {
+        border-left: 4px solid transparent;
+        transition: all 0.3s ease;
+    }
+
+    .flight-card:hover {
+        border-left-color: #0d6efd;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+</style>
+
 @if (Model.DepartureFlights.Any())
 {
-    <h4>Departure Flights</h4>
+    <h4 class="mt-4">Departure Flights</h4>
+    <div class="seat-class-container mb-3">
+        <label class="me-2">Select Seat Class:</label>
+        <select class="form-select form-select-sm seat-class-select" style="width: auto; display: inline-block;">
+            <option value="Economy">Economy</option>
+            <option value="Business">Business</option>
+            <option value="FirstClass">First Class</option>
+        </select>
+    </div>
+
     <table class="table table-hover mt-3">
         <thead class="table-dark">
             <tr>
@@ -11,13 +36,13 @@
                 <th>Departure</th>
                 <th>Arrival</th>
                 <th>Seats & Prices</th>
-                <th>Action</th>
+                <th>Select</th>
             </tr>
         </thead>
         <tbody>
             @foreach (var flight in Model.DepartureFlights)
             {
-                <tr>
+                <tr class="departure-flight-row">
                     <td><strong>@flight.FlightNumber</strong></td>
                     <td>@flight.Airline.Name</td>
                     <td>
@@ -53,8 +78,8 @@
                         }
                     </td>
                     <td>
-                        <button class="btn btn-outline-success btn-sm select-flight" data-flight-id="@flight.Id" data-flight-type="departure">
-                            <i class="bi bi-cart-check"></i> Select
+                        <button type="button" class="btn btn-outline-primary btn-sm select-flight" data-flight-id="@flight.Id" data-is-return="false">
+                            <i class="bi bi-check-circle"></i> Select
                         </button>
                     </td>
                 </tr>
@@ -64,7 +89,7 @@
 
     @if (Model.IsRoundTrip && Model.ReturnFlights.Any())
     {
-        <h4>Return Flights</h4>
+        <h4 class="mt-4">Return Flights</h4>
         <table class="table table-hover mt-3">
             <thead class="table-dark">
                 <tr>
@@ -73,13 +98,13 @@
                     <th>Departure</th>
                     <th>Arrival</th>
                     <th>Seats & Prices</th>
-                    <th>Action</th>
+                    <th>Select</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach (var flight in Model.ReturnFlights)
                 {
-                    <tr>
+                    <tr class="return-flight-row">
                         <td><strong>@flight.FlightNumber</strong></td>
                         <td>@flight.Airline.Name</td>
                         <td>
@@ -115,8 +140,8 @@
                             }
                         </td>
                         <td>
-                            <button class="btn btn-outline-success btn-sm select-flight" data-flight-id="@flight.Id" data-flight-type="return">
-                                <i class="bi bi-cart-check"></i> Select
+                            <button type="button" class="btn btn-outline-primary btn-sm select-flight" data-flight-id="@flight.Id" data-is-return="true">
+                                <i class="bi bi-check-circle"></i> Select
                             </button>
                         </td>
                     </tr>
@@ -124,60 +149,15 @@
             </tbody>
         </table>
     }
+
+    <script>
+        // Show the continue button container once flights are displayed
+        $("#continueButtonContainer").show();
+    </script>
 }
 else
 {
     <p class="text-warning text-center mt-3">
         <i class="bi bi-exclamation-triangle-fill"></i> No flights found for the selected criteria.
     </p>
-}
-
-@section Scripts {
-    <script>
-        $(document).ready(function () {
-            var selectedDepartureFlightId = null;
-            var selectedReturnFlightId = null;
-            var isRoundTrip = @Json.Serialize(Model.IsRoundTrip);
-
-            console.log("Document ready. Flight selection script loaded.");
-            console.log("IsRoundTrip:", isRoundTrip);
-
-            // Use event delegation for dynamically added elements
-            $(document).on("click", ".select-flight", function () {
-                var flightId = $(this).data("flight-id");
-                var flightType = $(this).data("flight-type");
-
-                console.log("Flight ID:", flightId, "Flight Type:", flightType);
-
-                if (flightType === "departure") {
-                    selectedDepartureFlightId = flightId;
-                } else if (flightType === "return") {
-                    selectedReturnFlightId = flightId;
-                }
-
-                console.log("Selected Departure Flight ID:", selectedDepartureFlightId);
-                console.log("Selected Return Flight ID:", selectedReturnFlightId);
-                console.log("Condition for redirect:", selectedDepartureFlightId && (!isRoundTrip || selectedReturnFlightId));
-
-                if (selectedDepartureFlightId && (!isRoundTrip || selectedReturnFlightId)) {
-                    var url = "@Url.Action("SelectFlights", "Booking", new
-            {
-                departureFlightId = "__DEPARTURE__",
-                returnFlightId = "__RETURN__",
-                seatClass = "Economy",
-                numberOfAdults = @Model.NumberOfAdults,
-                numberOfChildren = @Model.NumberOfChildren
-            })";
-
-                    url = url.replace("__DEPARTURE__", selectedDepartureFlightId)
-                        .replace("__RETURN__", selectedReturnFlightId || 0);
-
-                    console.log("Redirecting to:", url);
-                    window.location.href = url;
-                } else {
-                    alert("Please select both departure and return flights.");
-                }
-            });
-        });
-    </script>
 }

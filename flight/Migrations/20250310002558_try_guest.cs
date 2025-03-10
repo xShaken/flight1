@@ -5,7 +5,7 @@
 namespace flight.Migrations
 {
     /// <inheritdoc />
-    public partial class dateadd : Migration
+    public partial class try_guest : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

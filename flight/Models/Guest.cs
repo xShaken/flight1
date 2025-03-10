@@ -7,17 +7,29 @@ namespace flight.Models
     {
         public int Id { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "First name is required.")]
         public string FirstName { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Last name is required.")]
         public string LastName { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Title is required.")]
+
+        public string Title { get; set; } // Mr, Mrs, Ms, Dr
+
+        [Required(ErrorMessage = "Date of birth is required.")]
+        public DateTime DateOfBirth { get; set; }
+
+        [Required(ErrorMessage = "Nationality is required.")]
+        public string Nationality { get; set; }
+
+       
+
+        [Required(ErrorMessage = "IsChild is required.")]
         public bool IsChild { get; set; } // Indicates if the guest is a child
 
         [ForeignKey("Booking")]
-        public int BookingId { get; set; }
-        public Booking? Booking { get; set; }
+        public int BookingId { get; set; } // Foreign key to Booking
+        public Booking Booking { get; set; }
     }
 }

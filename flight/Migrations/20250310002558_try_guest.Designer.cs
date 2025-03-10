@@ -12,8 +12,8 @@ using flight.Data;
 namespace flight.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250308130846_drop")]
-    partial class drop
+    [Migration("20250310002558_try_guest")]
+    partial class try_guest
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -240,6 +240,9 @@ namespace flight.Migrations
                     b.Property<DateTime?>("ReturnDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<int?>("ReturnFlightId")
+                        .HasColumnType("int");
+
                     b.Property<string>("SeatClass")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -258,6 +261,8 @@ namespace flight.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("FlightId");
+
+                    b.HasIndex("ReturnFlightId");
 
                     b.HasIndex("UserId");
 
@@ -329,6 +334,46 @@ namespace flight.Migrations
                     b.HasIndex("DepartureAirportId");
 
                     b.ToTable("Flights");
+                });
+
+            modelBuilder.Entity("flight.Models.Guest", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("BookingId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("DateOfBirth")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsChild")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Nationality")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BookingId");
+
+                    b.ToTable("Guests");
                 });
 
             modelBuilder.Entity("flight.Models.Users", b =>
@@ -459,6 +504,10 @@ namespace flight.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("flight.Models.Flight", "ReturnFlight")
+                        .WithMany()
+                        .HasForeignKey("ReturnFlightId");
+
                     b.HasOne("flight.Models.Users", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
@@ -466,6 +515,8 @@ namespace flight.Migrations
                         .IsRequired();
 
                     b.Navigation("Flight");
+
+                    b.Navigation("ReturnFlight");
 
                     b.Navigation("User");
                 });
@@ -495,6 +546,22 @@ namespace flight.Migrations
                     b.Navigation("ArrivalAirport");
 
                     b.Navigation("DepartureAirport");
+                });
+
+            modelBuilder.Entity("flight.Models.Guest", b =>
+                {
+                    b.HasOne("flight.Models.Booking", "Booking")
+                        .WithMany("Guests")
+                        .HasForeignKey("BookingId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Booking");
+                });
+
+            modelBuilder.Entity("flight.Models.Booking", b =>
+                {
+                    b.Navigation("Guests");
                 });
 #pragma warning restore 612, 618
         }

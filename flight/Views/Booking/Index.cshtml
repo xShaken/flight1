@@ -2,6 +2,7 @@
 
 @{
     ViewData["Title"] = "Search Flights";
+
 }
 
 <h2>Search Flights</h2>
@@ -22,7 +23,7 @@
                 <option value="">Select Airport</option>
                 @foreach (var airport in Model ?? new List<flight.Models.Airport>())
                 {
-                        <option value="@airport.Id">@airport.Name</option>
+                    <option value="@airport.Id">@airport.Name</option>
                 }
             </select>
         </div>
@@ -33,7 +34,7 @@
                 <option value="">Select Airport</option>
                 @foreach (var airport in Model ?? new List<flight.Models.Airport>())
                 {
-                        <option value="@airport.Id">@airport.Name</option>
+                    <option value="@airport.Id">@airport.Name</option>
                 }
             </select>
         </div>
@@ -47,15 +48,27 @@
             <label for="returnDate">Return Date:</label>
             <input type="date" class="form-control" id="returnDate" name="returnDate">
         </div>
+    </div>
 
+    <div class="row mt-3">
         <div class="col-md-2">
-            <label for="numberOfAdults">Adults:</label>
-            <input type="number" class="form-control" id="numberOfAdults" name="numberOfAdults" min="1" max="10" required>
+            <label for="numberOfAdults">Adults (12+ years):</label>
+            <select class="form-control" id="numberOfAdults" name="numberOfAdults" required>
+                @for (int i = 1; i <= 10; i++)
+                {
+                    <option value="@i">@i</option>
+                }
+            </select>
         </div>
 
         <div class="col-md-2">
-            <label for="numberOfChildren">Children:</label>
-            <input type="number" class="form-control" id="numberOfChildren" name="numberOfChildren" min="0" max="10" required>
+            <label for="numberOfChildren">Children (2-11 years):</label>
+            <select class="form-control" id="numberOfChildren" name="numberOfChildren">
+                @for (int i = 0; i <= 9; i++)
+                {
+                    <option value="@i">@i</option>
+                }
+            </select>
         </div>
 
         <div class="col-md-2 d-flex align-items-end">
@@ -64,36 +77,109 @@
     </div>
 </form>
 
-
-
 <div id="flightResults" class="mt-4"></div>
 
-@section Scripts {
-        <script>
-            $(document).ready(function () {
-                // Show/hide return date based on trip type
-                $("#tripType").change(function () {
-                    if ($(this).val() === "roundtrip") {
-                        $("#returnDateContainer").show();
-                        $("#returnDate").attr("required", true);
-                    } else {
-                        $("#returnDateContainer").hide();
-                        $("#returnDate").attr("required", false);
-                    }
-                });
+<!-- Hidden fields for selected flights -->
+<input type="hidden" id="selectedDepartureFlightId" value="" />
+<input type="hidden" id="selectedReturnFlightId" value="" />
+<input type="hidden" id="selectedSeatClass" value="Economy" />
 
-                // Submit form via AJAX
-                $("#flightSearchForm").submit(function (e) {
-                    e.preventDefault();
-                    $.ajax({
-                        url: "@Url.Action("SearchFlights", "Booking")",
-                        type: "POST",
-                        data: $(this).serialize(),
-                        success: function (result) {
-                            $("#flightResults").html(result);
-                        }
-                    });
-                });
-            });
-        </script>
+<div class="row mt-3 mb-5" id="continueButtonContainer" style="display: none;">
+    <div class="col-md-12 text-center">
+        <button id="continueToPassengerInfo" class="btn btn-success btn-lg" disabled>
+            Continue to Passenger Information
+        </button>
+    </div>
+</div>
+
+@section Scripts {
+
+    <script>
+$(document).ready(function () {
+    // Show/hide return date based on trip type
+    $("#tripType").change(function () {
+        if ($(this).val() === "roundtrip") {
+            $("#returnDateContainer").show();
+            $("#returnDate").attr("required", true);
+        } else {
+            $("#returnDateContainer").hide();
+            $("#returnDate").attr("required", false);
+        }
+    });
+
+    // Submit form via AJAX
+    $("#flightSearchForm").submit(function (e) {
+        e.preventDefault();
+        
+        // Validate passenger count
+        const numberOfAdults = parseInt($("#numberOfAdults").val()) || 0;
+        const numberOfChildren = parseInt($("#numberOfChildren").val()) || 0;
+        const totalPassengers = numberOfAdults + numberOfChildren;
+        
+        if (totalPassengers > 10) {
+            alert("You can only book for a maximum of 10 guests (adults + children)");
+            return false;
+        }
+        
+        if (numberOfAdults < 1) {
+            alert("You must have at least 1 adult passenger");
+            return false;
+        }
+        
+        // Submit the form if validation passes
+        $.ajax({
+            url: "/Booking/SearchFlights",
+            type: "POST",
+            data: $(this).serialize(),
+            success: function (result) {
+                $("#flightResults").html(result);
+            }
+        });
+    });
+    
+    // Handle flight selection
+    $(document).on("click", ".select-flight", function() {
+        const flightId = $(this).data("flight-id");
+        const isReturn = $(this).data("is-return");
+        
+        if (isReturn) {
+            $("#selectedReturnFlightId").val(flightId);
+            $(".return-flight-row").removeClass("selected-flight");
+        } else {
+            $("#selectedDepartureFlightId").val(flightId);
+            $(".departure-flight-row").removeClass("selected-flight");
+        }
+        
+        $(this).closest("tr").addClass("selected-flight");
+        
+        // Enable the continue button if both flights are selected for round trip
+        // or if just the departure flight is selected for one-way
+        const tripType = $("#tripType").val();
+        const departureSelected = $("#selectedDepartureFlightId").val() !== "";
+        const returnSelected = $("#selectedReturnFlightId").val() !== "";
+        
+        if ((tripType === "roundtrip" && departureSelected && returnSelected) || 
+            (tripType === "oneway" && departureSelected)) {
+            $("#continueToPassengerInfo").removeAttr("disabled");
+        }
+    });
+    
+    // Handle seat class selection
+    $(document).on("change", ".seat-class-select", function() {
+        const seatClass = $(this).val();
+        $("#selectedSeatClass").val(seatClass);
+    });
+    
+    // Continue to passenger information
+    $("#continueToPassengerInfo").click(function() {
+        const departureFlightId = $("#selectedDepartureFlightId").val();
+        const returnFlightId = $("#selectedReturnFlightId").val() || 0;
+        const seatClass = $("#selectedSeatClass").val();
+        const numberOfAdults = $("#numberOfAdults").val();
+        const numberOfChildren = $("#numberOfChildren").val();
+        
+        window.location.href = `/Booking/SelectFlights?departureFlightId=${departureFlightId}&returnFlightId=${returnFlightId}&seatClass=${seatClass}&numberOfAdults=${numberOfAdults}&numberOfChildren=${numberOfChildren}`;
+    });
+});
+</script>
 }

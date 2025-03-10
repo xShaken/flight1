@@ -11,6 +11,8 @@ namespace flight.Data
         public DbSet<Airline> Airlines { get; set; }
         public DbSet<Airport> Airports { get; set; }
         public DbSet<Booking> Bookings { get; set; }
+        public DbSet<Guest> Guests { get; set; }
+        
 
 
 
@@ -40,12 +42,12 @@ namespace flight.Data
                 .HasForeignKey(f => f.ArrivalAirportId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-        
+            // Correctly configure the relationship between Booking and Guest
             builder.Entity<Booking>()
-                .HasMany(b => b.Guests)
-                .WithOne()
-                .HasForeignKey(g => g.BookingId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .HasMany(b => b.Guests) // Booking has many Guests
+                .WithOne(g => g.Booking) // Guest has one Booking
+                .HasForeignKey(g => g.BookingId) // Foreign key in Guest
+                .OnDelete(DeleteBehavior.Cascade); // Cascade delete
         }
     }
     }

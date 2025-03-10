@@ -5,25 +5,25 @@
 namespace flight.Migrations
 {
     /// <inheritdoc />
-    public partial class drop : Migration
+    public partial class remove : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "TicketPrice",
-                table: "Flights");
+                name: "RewardsMembershipId",
+                table: "Guest");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<decimal>(
-                name: "TicketPrice",
-                table: "Flights",
-                type: "decimal(18,2)",
+            migrationBuilder.AddColumn<string>(
+                name: "RewardsMembershipId",
+                table: "Guest",
+                type: "nvarchar(max)",
                 nullable: false,
-                defaultValue: 0m);
+                defaultValue: "");
         }
     }
 }
