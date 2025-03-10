@@ -26,6 +26,6 @@ namespace flight.ViewModels
         public string UserId { get; set; }
 
         // Remove this if not needed or make it nullable
-        public Booking Booking { get; set; }
+        public int BookingId { get; set; } // Add this property
     }
 }

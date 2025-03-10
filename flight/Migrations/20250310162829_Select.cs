@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace flight.Migrations
 {
     /// <inheritdoc />
-    public partial class BookingPartial : Migration
+    public partial class Select : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -275,21 +275,24 @@ namespace flight.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Guest",
+                name: "Guests",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     FirstName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     LastName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    DateOfBirth = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Nationality = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     IsChild = table.Column<bool>(type: "bit", nullable: false),
                     BookingId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Guest", x => x.Id);
+                    table.PrimaryKey("PK_Guests", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Guest_Bookings_BookingId",
+                        name: "FK_Guests_Bookings_BookingId",
                         column: x => x.BookingId,
                         principalTable: "Bookings",
                         principalColumn: "Id",
@@ -366,8 +369,8 @@ namespace flight.Migrations
                 column: "DepartureAirportId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Guest_BookingId",
-                table: "Guest",
+                name: "IX_Guests_BookingId",
+                table: "Guests",
                 column: "BookingId");
         }
 
@@ -390,7 +393,7 @@ namespace flight.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "Guest");
+                name: "Guests");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");

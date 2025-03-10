@@ -1,5 +1,7 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace flight.Models
 {
@@ -10,38 +12,38 @@ namespace flight.Models
         [Required]
         [ForeignKey("Flight")]
         public int FlightId { get; set; }
-        public Flight? Flight { get; set; }
+        public Flight Flight { get; set; }
 
         [ForeignKey("ReturnFlight")]
-        public int? ReturnFlightId { get; set; } // For round-trip bookings
-        public Flight? ReturnFlight { get; set; }
+        public int? ReturnFlightId { get; set; }
+        public Flight ReturnFlight { get; set; }
 
-        [Required]
         [ForeignKey("Users")]
-        public string UserId { get; set; }
-        public Users? User { get; set; }
+        public string? UserId { get; set; } // Make this nullable
+        public Users User { get; set; }
 
         [Required]
-        public string SeatClass { get; set; } // Business, Economy, First Class
+        public string SeatClass { get; set; }
 
         [Required]
-        public int NumberOfAdults { get; set; } // Number of adult passengers
+        public int NumberOfAdults { get; set; }
 
         [Required]
-        public int NumberOfChildren { get; set; } // Number of child passengers
+        public int NumberOfChildren { get; set; }
 
         [Column(TypeName = "decimal(18,2)")]
-        public decimal TotalPrice { get; set; } // Automatically calculated based on seat selection
+        public decimal TotalPrice { get; set; }
 
         [Required]
-        public DateTime DepartureDate { get; set; } // Selected departure date
+        public DateTime DepartureDate { get; set; }
 
-        public DateTime? ReturnDate { get; set; } // Optional return date for round-trip bookings
+        public DateTime? ReturnDate { get; set; }
 
         public DateTime BookingDate { get; set; } = DateTime.UtcNow;
 
-        public string Status { get; set; } = "Pending"; // Pending, Confirmed, Cancelled
+        public string Status { get; set; } = "Pending";
 
-        public List<Guest> Guests { get; set; } = new List<Guest>(); // List of guests
+        public List<Guest> Guests { get; set; } = new List<Guest>();
+        public Payment Payment { get; set; }
     }
 }

@@ -9,6 +9,16 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowTrustedOrigins", policy =>
+    {
+        policy.WithOrigins("https://trusted-domain.com")
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
 builder.Services.AddDbContext<AppDbContext>(options =>
 
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -26,6 +36,19 @@ builder.Services.AddIdentity<Users, IdentityRole>(options =>
 })
     .AddEntityFrameworkStores<AppDbContext>()
     .AddDefaultTokenProviders();
+
+
+// Register PayMongoService with HttpClient
+builder.Services.AddHttpClient<PayMongoService>(client =>
+{
+    client.BaseAddress = new Uri("https://api.paymongo.com/v1/");
+});
+
+// Register PayMongoService with the secret key
+builder.Services.AddSingleton(new PayMongoServiceConfiguration
+{
+    SecretKey = "sk_test_fPggWcV2yjLdBmAHam4aYiGJ" // Replace with your PayMongo secret key
+});
 
 var app = builder.Build();
 
