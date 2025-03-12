@@ -10,7 +10,7 @@
             <h2 class="card-title mb-0">Create New Flight</h2>
         </div>
         <div class="card-body">
-            <form asp-action="Create" method="post" class="needs-validation" novalidate onsubmit="return validateAirports()">
+            <form asp-action="Create" method="post" class="needs-validation" novalidate onsubmit="return validateForm()">
                 <div class="row g-3">
                     <!-- Flight Number -->
                     <div class="col-md-6">
@@ -70,46 +70,44 @@
                     <!-- Business Seats -->
                     <div class="col-md-6">
                         <label asp-for="BusinessSeatsAvailable" class="form-label">Business Class Seats</label>
-                        <input asp-for="BusinessSeatsAvailable" type="number" class="form-control" required />
+                        <input asp-for="BusinessSeatsAvailable" type="number" class="form-control" min="0" step="1" required />
                         <span asp-validation-for="BusinessSeatsAvailable" class="text-danger"></span>
                     </div>
 
                     <!-- Business Class Price -->
                     <div class="col-md-6">
                         <label asp-for="BusinessClassPrice" class="form-label">Business Class Price</label>
-                        <input asp-for="BusinessClassPrice" type="number" step="0.01" class="form-control" required />
+                        <input asp-for="BusinessClassPrice" type="number" class="form-control" min="0" step="0.01" required />
                         <span asp-validation-for="BusinessClassPrice" class="text-danger"></span>
                     </div>
 
                     <!-- Economy Seats -->
                     <div class="col-md-6">
                         <label asp-for="EconomySeatsAvailable" class="form-label">Economy Class Seats</label>
-                        <input asp-for="EconomySeatsAvailable" type="number" class="form-control" required />
+                        <input asp-for="EconomySeatsAvailable" type="number" class="form-control" min="0" step="1" required />
                         <span asp-validation-for="EconomySeatsAvailable" class="text-danger"></span>
                     </div>
 
                     <!-- Economy Class Price -->
                     <div class="col-md-6">
                         <label asp-for="EconomyClassPrice" class="form-label">Economy Class Price</label>
-                        <input asp-for="EconomyClassPrice" type="number" step="0.01" class="form-control" required />
+                        <input asp-for="EconomyClassPrice" type="number" class="form-control" min="0" step="0.01" required />
                         <span asp-validation-for="EconomyClassPrice" class="text-danger"></span>
                     </div>
 
                     <!-- First Class Seats -->
                     <div class="col-md-6">
                         <label asp-for="FirstClassSeatsAvailable" class="form-label">First Class Seats</label>
-                        <input asp-for="FirstClassSeatsAvailable" type="number" class="form-control" required />
+                        <input asp-for="FirstClassSeatsAvailable" type="number" class="form-control" min="0" step="1" required />
                         <span asp-validation-for="FirstClassSeatsAvailable" class="text-danger"></span>
                     </div>
 
                     <!-- First Class Price -->
                     <div class="col-md-6">
                         <label asp-for="FirstClassPrice" class="form-label">First Class Price</label>
-                        <input asp-for="FirstClassPrice" type="number" step="0.01" class="form-control" required />
+                        <input asp-for="FirstClassPrice" type="number" class="form-control" min="0" step="0.01" required />
                         <span asp-validation-for="FirstClassPrice" class="text-danger"></span>
                     </div>
-
-                   
                 </div>
 
                 <!-- Submit Button -->
@@ -135,6 +133,37 @@
                 return false; // Prevent form submission
             }
             return true; // Allow form submission
+        }
+
+        // JavaScript to validate whole numbers for seats
+        function validateForm() {
+            const businessSeats = document.querySelector('input[name="BusinessSeatsAvailable"]');
+            const economySeats = document.querySelector('input[name="EconomySeatsAvailable"]');
+            const firstClassSeats = document.querySelector('input[name="FirstClassSeatsAvailable"]');
+
+            if (!Number.isInteger(parseFloat(businessSeats.value))) {
+                alert("Business Class Seats must be a whole number.");
+                return false;
+            }
+            if (!Number.isInteger(parseFloat(economySeats.value))) {
+                alert("Economy Class Seats must be a whole number.");
+                return false;
+            }
+            if (!Number.isInteger(parseFloat(firstClassSeats.value))) {
+                alert("First Class Seats must be a whole number.");
+                return false;
+            }
+
+            // Validate departure and arrival date & time
+            const departureDateTime = document.querySelector('input[name="DepartureDateTime"]').value;
+            const arrivalDateTime = document.querySelector('input[name="EstimatedArrivalDateTime"]').value;
+
+            if (departureDateTime === arrivalDateTime) {
+                alert("Departure and Arrival date & time cannot be the same.");
+                return false;
+            }
+
+            return validateAirports(); // Also validate airports
         }
     </script>
 }

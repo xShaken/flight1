@@ -8,90 +8,16 @@
     <h2>Booking Summary</h2>
     <div class="card mb-4">
         <div class="card-header">
-            <h4>Review your booking before proceeding to payment</h4>
+            <h3>Booking Details</h3>
         </div>
         <div class="card-body">
-            <!-- Departure Flight -->
-            <div class="mb-4">
-                <h5>@Model.Flight.DepartureAirport.Name - @Model.Flight.ArrivalAirport.Name</h5>
-                <p>
-                    <strong>Date:</strong> @Model.DepartureDate.ToString("dd MMM yyyy") <br />
-                    <strong>Time:</strong> @Model.Flight.DepartureDateTime.ToString("hh:mm tt") - @Model.Flight.EstimatedArrivalDateTime.ToString("hh:mm tt") <br />
-                    <strong>Class:</strong> @Model.SeatClass
-                </p>
-                <p>
-                    <strong>Passenger:</strong> @Model.Guests.First().FirstName @Model.Guests.First().LastName <br />
-                    <strong>Price:</strong> @Model.TotalPrice.ToString("C")
-                </p>
-            </div>
-
-            <!-- Return Flight (if applicable) -->
-            @if (Model.ReturnFlight != null)
+            <p><strong>Booking ID:</strong> @Model.Id</p>
+            <p><strong>Status:</strong> @Model.Status</p>
+            <p><strong>Total Price:</strong> @Model.TotalPrice.ToString("C")</p>
+            @if (Model.Status == "Pending")
             {
-                <div class="mb-4">
-                    <h5>@Model.ReturnFlight.DepartureAirport.Name - @Model.ReturnFlight.ArrivalAirport.Name</h5>
-                    <p>
-                        <strong>Date:</strong> @Model.ReturnDate.Value.ToString("dd MMM yyyy") <br />
-                        <strong>Time:</strong> @Model.ReturnFlight.DepartureDateTime.ToString("hh:mm tt") - @Model.ReturnFlight.EstimatedArrivalDateTime.ToString("hh:mm tt") <br />
-                        <strong>Class:</strong> @Model.SeatClass
-                    </p>
-                    <p>
-                        <strong>Passenger:</strong> @Model.Guests.First().FirstName @Model.Guests.First().LastName <br />
-                        <strong>Price:</strong> @Model.TotalPrice.ToString("C")
-                    </p>
-                </div>
+                <a href="@ViewBag.PaymentLink" class="btn btn-primary">Proceed to Payment</a>
             }
-
-            <!-- Additional Charges -->
-            <div class="mb-4">
-                <h5>Additional Charges</h5>
-                <p>
-                    <strong>Travel Insurance:</strong> PHP 965.00 <br />
-                    <strong>Taxes and Fees:</strong> Included
-                </p>
-            </div>
-
-            <!-- Total Price -->
-            <div class="mb-4">
-                <h5>Total</h5>
-                <p>
-                    <strong>Total Price:</strong> @((Model.TotalPrice + 965.00m).ToString("C"))
-                </p>
-            </div>
-
-            <!-- Confirmation Checkbox -->
-            <div class="form-check mb-4">
-                <input class="form-check-input" type="checkbox" id="conditionsCheckbox" required>
-                <label class="form-check-label" for="conditionsCheckbox">
-                    By clicking 'Continue' I confirm that I have read, understood, and accept the <strong>Conditions of Carriage</strong>
-                </label>
-            </div>
-
-            <!-- Navigation Buttons -->
-            <div class="row mt-4">
-                <div class="col-md-6">
-                    <a href="@Url.Action("GuestInformation", "Booking")" class="btn btn-outline-secondary">
-                        <i class="bi bi-arrow-left"></i> Back
-                    </a>
-                </div>
-                <div class="col-md-6 text-end">
-                    <button type="submit" class="btn btn-primary btn-lg" onclick="proceedToPayment()">
-                        Continue to Payment <i class="bi bi-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
         </div>
     </div>
 </div>
-
-@section Scripts {
-    <script>
-        function proceedToPayment() {
-            if (document.getElementById('conditionsCheckbox').checked) {
-                window.location.href = '@Url.Action("Payment", "Booking")';
-            } else {
-                alert('Please confirm that you have read and accept the Conditions of Carriage.');
-            }
-        }
-    </script>
-}

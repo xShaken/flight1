@@ -12,8 +12,8 @@ using flight.Data;
 namespace flight.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250309234200_ix")]
-    partial class ix
+    [Migration("20250310162829_Select")]
+    partial class Select
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

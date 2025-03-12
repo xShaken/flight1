@@ -12,8 +12,8 @@ using flight.Data;
 namespace flight.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250309185531_remove")]
-    partial class remove
+    [Migration("20250310213552_nullable")]
+    partial class nullable
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -255,7 +255,6 @@ namespace flight.Migrations
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("UserId")
-                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
@@ -373,7 +372,40 @@ namespace flight.Migrations
 
                     b.HasIndex("BookingId");
 
-                    b.ToTable("Guest");
+                    b.ToTable("Guests");
+                });
+
+            modelBuilder.Entity("flight.Models.Payment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("BookingId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("PaymentDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("PaymentIntentId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BookingId")
+                        .IsUnique();
+
+                    b.ToTable("Payments");
                 });
 
             modelBuilder.Entity("flight.Models.Users", b =>
@@ -510,9 +542,7 @@ namespace flight.Migrations
 
                     b.HasOne("flight.Models.Users", "User")
                         .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("UserId");
 
                     b.Navigation("Flight");
 
@@ -559,9 +589,23 @@ namespace flight.Migrations
                     b.Navigation("Booking");
                 });
 
+            modelBuilder.Entity("flight.Models.Payment", b =>
+                {
+                    b.HasOne("flight.Models.Booking", "Booking")
+                        .WithOne("Payment")
+                        .HasForeignKey("flight.Models.Payment", "BookingId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Booking");
+                });
+
             modelBuilder.Entity("flight.Models.Booking", b =>
                 {
                     b.Navigation("Guests");
+
+                    b.Navigation("Payment")
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

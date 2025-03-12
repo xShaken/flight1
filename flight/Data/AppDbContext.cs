@@ -12,7 +12,8 @@ namespace flight.Data
         public DbSet<Airport> Airports { get; set; }
         public DbSet<Booking> Bookings { get; set; }
         public DbSet<Guest> Guests { get; set; }
-        
+        public DbSet<Payment> Payments { get; set; }
+
 
 
 
@@ -48,6 +49,15 @@ namespace flight.Data
                 .WithOne(g => g.Booking) // Guest has one Booking
                 .HasForeignKey(g => g.BookingId) // Foreign key in Guest
                 .OnDelete(DeleteBehavior.Cascade); // Cascade delete
+
+            builder.Entity<Payment>()
+        .HasOne(p => p.Booking)
+        .WithOne(b => b.Payment)
+        .HasForeignKey<Payment>(p => p.BookingId)
+        .OnDelete(DeleteBehavior.Cascade);
+
+
+
         }
     }
     }

@@ -40,7 +40,7 @@ namespace flight.Controllers
         {
             return View();
         }
-
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Dashboard()
         {
             var flights = await _context.Flights
@@ -112,18 +112,18 @@ namespace flight.Controllers
 
             return RedirectToAction("Dashboard");
         }
-
+        [Authorize(Roles = "Admin")]
         public IActionResult Flights()
         {
             return View();
         }
-
+        [Authorize(Roles = "Admin")]
         public IActionResult Airlines()
         {
             var airlines = _context.Airlines.ToList();
             return View(airlines);
         }
-
+        [Authorize(Roles = "Admin")]
         public IActionResult Airports()
         {
             var airports = _context.Airports.ToList();

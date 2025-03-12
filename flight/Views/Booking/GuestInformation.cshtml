@@ -43,7 +43,7 @@
             <h3>Passenger Details</h3>
         </div>
         <div class="card-body">
-            <form asp-controller="Booking" asp-action="Confirmation" method="post">
+            <form asp-controller="Booking" asp-action="Confirmation" method="post" id="booking-form">
                 <!-- Hidden fields for required model properties -->
                 <input type="hidden" asp-for="DepartureFlight.Id" />
                 <input type="hidden" asp-for="DepartureFlight.DepartureAirportId" />
@@ -67,7 +67,8 @@
                 <input type="hidden" asp-for="SeatClass" />
                 <input type="hidden" asp-for="NumberOfAdults" />
                 <input type="hidden" asp-for="NumberOfChildren" />
-                <input type="hidden" asp-for="UserId" value="@(string.IsNullOrEmpty(Model.UserId) ? "guest-" + Guid.NewGuid().ToString() : Model.UserId)" />
+                <input type="hidden" asp-for="UserId" value="@(string.IsNullOrEmpty(Model.UserId) ? null : Model.UserId)" />
+                <input type="hidden" asp-for="BookingId" value="@Model.BookingId" />
 
                 <h4>Adult Passengers (@Model.NumberOfAdults)</h4>
                 @for (int i = 0; i < Model.NumberOfAdults; i++)
@@ -91,10 +92,6 @@
                                 <div class="col-md-6 mb-3">
                                     <label for="guests[@i].DateOfBirth" class="form-label">Date of Birth</label>
                                     <input type="date" class="form-control" id="guests[@i].DateOfBirth" name="guests[@i].DateOfBirth" required>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="guests[@i].PassportNumber" class="form-label">Passport/ID Number</label>
-                                    <input type="text" class="form-control" id="guests[@i].PassportNumber" name="guests[@i].PassportNumber" required>
                                 </div>
                             </div>
                             <div class="mb-3">
@@ -134,10 +131,6 @@
                                     <div class="col-md-6 mb-3">
                                         <label for="guests[@i].DateOfBirth" class="form-label">Date of Birth</label>
                                         <input type="date" class="form-control" id="guests[@i].DateOfBirth" name="guests[@i].DateOfBirth" required>
-                                    </div>
-                                    <div class="col-md-6 mb-3">
-                                        <label for="guests[@i].PassportNumber" class="form-label">Passport/ID Number</label>
-                                        <input type="text" class="form-control" id="guests[@i].PassportNumber" name="guests[@i].PassportNumber" required>
                                     </div>
                                 </div>
                                 <input type="hidden" name="guests[@i].IsAdult" value="false">
@@ -214,29 +207,29 @@
                             <tbody>
                                 <tr>
                                     <td>Departure Flight (@Model.SeatClass)</td>
-                                    <td>@departurePrice.ToString("C")</td>
+                                    <td>₱@departurePrice.ToString("N2")</td>
                                 </tr>
                                 @if (Model.ReturnFlight != null)
                                 {
                                     <tr>
                                         <td>Return Flight (@Model.SeatClass)</td>
-                                        <td>@returnPrice.ToString("C")</td>
+                                        <td>₱@returnPrice.ToString("N2")</td>
                                     </tr>
                                 }
                                 <tr>
                                     <td>Adult Passengers (x@(Model.NumberOfAdults))</td>
-                                    <td>@adultTotal.ToString("C")</td>
+                                    <td>₱@adultTotal.ToString("N2")</td>
                                 </tr>
                                 @if (Model.NumberOfChildren > 0)
                                 {
                                     <tr>
                                         <td>Child Passengers (x@(Model.NumberOfChildren))</td>
-                                        <td>@childTotal.ToString("C")</td>
+                                        <td>₱@childTotal.ToString("N2")</td>
                                     </tr>
                                 }
                                 <tr class="table-active">
                                     <th>Total Price</th>
-                                    <th>@totalPrice.ToString("C")</th>
+                                    <th>₱@totalPrice.ToString("N2")</th>
                                 </tr>
                             </tbody>
                         </table>
@@ -258,7 +251,7 @@
                 </div>
 
                 <div class="d-grid gap-2">
-                    <button type="submit" class="btn btn-primary btn-lg">Continue to Payment</button>
+                    <button id="processPaymentButton" class="btn btn-primary">Proceed to Payment</button>
                 </div>
             </form>
         </div>
@@ -299,14 +292,40 @@
 </div>
 
 @section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Handle the same as passenger checkbox
-            const sameAsPassengerCheckbox = document.getElementById('sameAsPassenger');
-            const contactInfoDiv = document.getElementById('contactInfo');
+        $(document).ready(function () {
+            // Handle the "Proceed to Payment" button click
+            $("#processPaymentButton").click(function (e) {
+                e.preventDefault(); // Prevent the form from submitting
 
-            sameAsPassengerCheckbox.addEventListener('change', function() {
-                contactInfoDiv.style.display = this.checked ? 'none' : 'block';
+                // Get the bookingId from the hidden field
+                const bookingId = $("#BookingId").val();
+
+                // Validate the bookingId
+                if (!bookingId || bookingId <= 0) {
+                    alert("Invalid booking ID. Please try again.");
+                    return;
+                }
+
+                // Send the AJAX request to process the payment
+                $.ajax({
+                    url: '/Booking/ProcessPayment', // URL of the ProcessPayment action
+                    type: 'POST', // HTTP method
+                    data: { bookingId: bookingId }, // Data to send (bookingId)
+                    success: function (response) {
+                        // Handle the successful response
+                        console.log('Payment processed successfully:', response);
+                        alert('Payment processed successfully!');
+                        // Optionally, redirect to a confirmation page
+                        window.location.href = '/Booking/Confirmation';
+                    },
+                    error: function (error) {
+                        // Handle errors
+                        console.error('Error processing payment:', error);
+                        alert('An error occurred while processing the payment. Please try again.');
+                    }
+                });
             });
         });
     </script>

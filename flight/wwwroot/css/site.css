@@ -92,10 +92,14 @@ html, body {
     }
 
     /* Logout Button */
-    .list-group-item.text-danger:hover {
-        background-color: #dc3545 !important;
-        color: white !important;
+    .list-group-item.logout-button {
+        color: #ffcc00; /* Yellow color to match the sidebar theme */
     }
+
+        .list-group-item.logout-button:hover {
+            background-color: #ffcc00; /* Yellow background on hover */
+            color: #08385b !important; /* Dark blue text on hover */
+        }
 
 /* === PAGE CONTENT === */
 #page-content-wrapper {
@@ -171,9 +175,10 @@ html, body {
 
 .table {
     width: 100%;
-    border-collapse: collapse;
-    border-radius: 10px;
-    overflow: hidden;
+    border-collapse: separate;
+    border-spacing: 0;
+    table-layout: auto; /* Allows proper column sizing */
+    word-wrap: break-word;
 }
 
     .table thead {
@@ -182,13 +187,14 @@ html, body {
     }
 
         .table thead th {
-            padding: 18px;
+            padding: 12px 10px;
             text-align: left;
-            font-size: 16px;
+            font-size: 14px;
             font-weight: bold;
             text-transform: uppercase;
             letter-spacing: 0.5px;
             border-bottom: 2px solid #ffcc00;
+            white-space: nowrap; /* Prevents header text wrapping */
         }
 
     .table tbody tr {
@@ -201,10 +207,59 @@ html, body {
         }
 
     .table tbody td {
-        padding: 15px;
-        font-size: 15px;
+        padding: 10px 8px;
+        font-size: 14px;
         color: #333;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        max-width: 150px; /* Prevents column expansion */
     }
+
+    /* === FIX COLUMN SIZES === */
+    .table th:nth-child(1), .table td:nth-child(1) {
+        width: 5%;
+    }
+    /* # */
+    .table th:nth-child(2), .table td:nth-child(2) {
+        width: 10%;
+    }
+    /* Flight Number */
+    .table th:nth-child(3), .table td:nth-child(3) {
+        width: 15%;
+    }
+    /* Airline */
+    .table th:nth-child(4), .table td:nth-child(4) {
+        width: 10%;
+    }
+    /* Aircraft Code */
+    .table th:nth-child(5), .table td:nth-child(5) {
+        width: 15%;
+    }
+    /* Departure Airport */
+    .table th:nth-child(6), .table td:nth-child(6) {
+        width: 15%;
+    }
+    /* Arrival Airport */
+    .table th:nth-child(7), .table td:nth-child(7) {
+        width: 12%;
+    }
+    /* Departure Time */
+    .table th:nth-child(8), .table td:nth-child(8) {
+        width: 12%;
+    }
+    /* Arrival Time */
+    .table th:nth-child(9), .table td:nth-child(9) {
+        width: 12%;
+    }
+    /* Date Added */
+    .table th:nth-child(10), .table td:nth-child(10) {
+        width: 8%;
+    }
+    /* Status */
+    .table th:nth-child(11), .table td:nth-child(11) {
+        width: 8%;
+    }
+/* Action */
 
 /* === STATUS BADGES === */
 .status-badge {
@@ -216,8 +271,28 @@ html, body {
     text-transform: uppercase;
 }
 
+.status-scheduled {
+    background-color: #28a745; /* Blue for Scheduled */
+    color: white;
+}
+
 .status-active {
     background-color: #28a745;
+    color: white;
+}
+
+.status-delayed {
+    background-color: #ffc107; /* Yellow for Delayed */
+    color: #333;
+}
+
+.status-departed {
+    background-color: #17a2b8; /* Info blue for Departed */
+    color: white;
+}
+
+.status-arrived {
+    background-color: #28a745; /* Green for Arrived */
     color: white;
 }
 
@@ -281,7 +356,7 @@ html, body {
     }
 
 /* === RESPONSIVE TABLE === */
-@media (max-width: 768px) {
+@media (max-width: 992px) {
     .table thead {
         display: none;
     }
@@ -302,6 +377,8 @@ html, body {
             font-size: 14px;
             text-align: right;
             position: relative;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
         }
 
             .table tbody td::before {
