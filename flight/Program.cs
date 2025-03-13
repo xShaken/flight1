@@ -1,28 +1,33 @@
 ﻿using flight.Data;
 using flight.Models;
 using flight.Services;
+using flight.Services.flight.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Net.Http.Headers;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
+// Configure CORS
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowTrustedOrigins", policy =>
+    options.AddPolicy("AllowAllOrigins", policy =>
     {
-        policy.WithOrigins("https://trusted-domain.com")
+        policy.AllowAnyOrigin()
               .AllowAnyHeader()
               .AllowAnyMethod();
     });
 });
 
+// Configure DbContext
 builder.Services.AddDbContext<AppDbContext>(options =>
-
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+// Configure Identity
 builder.Services.AddIdentity<Users, IdentityRole>(options =>
 {
     options.Password.RequireDigit = true;
@@ -32,44 +37,38 @@ builder.Services.AddIdentity<Users, IdentityRole>(options =>
     options.SignIn.RequireConfirmedAccount = false;
     options.SignIn.RequireConfirmedEmail = false;
     options.SignIn.RequireConfirmedPhoneNumber = false;
-
 })
-    .AddEntityFrameworkStores<AppDbContext>()
-    .AddDefaultTokenProviders();
+.AddEntityFrameworkStores<AppDbContext>()
+.AddDefaultTokenProviders();
 
+// Register PayMongoServiceConfiguration
+builder.Services.Configure<PayMongoServiceConfiguration>(builder.Configuration.GetSection("PayMongo"));
 
 // Register PayMongoService with HttpClient
-builder.Services.AddHttpClient<PayMongoService>(client =>
+builder.Services.AddHttpClient<PayMongoService>((serviceProvider, client) =>
 {
-    client.BaseAddress = new Uri("https://api.paymongo.com/v1/");
-});
-
-// Register PayMongoService with the secret key
-builder.Services.AddSingleton(new PayMongoServiceConfiguration
-{
-    SecretKey = "sk_test_fPggWcV2yjLdBmAHam4aYiGJ" // Replace with your PayMongo secret key
+    var config = serviceProvider.GetRequiredService<PayMongoServiceConfiguration>();
+    client.BaseAddress = new Uri("https://api.paymongo.com/");
+    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(Encoding.ASCII.GetBytes(config.SecretKey)));
 });
 
 var app = builder.Build();
 
+// Seed the database
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     await SeedService.SeedDatabase(services);
 }
 
-
-var serviceProvider = app.Services;
-await SeedService.SeedDatabase(serviceProvider);
-
-
-await SeedService.SeedDatabase(app.Services);
-
 // Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment())
+{
+    app.UseDeveloperExceptionPage();
+}
+else
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
@@ -77,6 +76,8 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+
+app.UseCors("AllowAllOrigins");
 
 app.UseAuthentication();
 app.UseAuthorization();

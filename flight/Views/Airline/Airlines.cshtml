@@ -83,6 +83,7 @@
 </div>
 
 <!-- Add Airline Modal -->
+<!-- Add Airline Modal -->
 <div class="modal fade" id="addAirlineModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -105,11 +106,53 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Logo</label>
-                        <input type="file" name="LogoFile" class="form-control" />
+                        <input type="file" name="LogoFile" class="form-control" accept="image/*" />
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="submit" class="btn btn-success">Create</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Airline Modal -->
+<div class="modal fade" id="editAirlineModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Airline</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="editAirlineForm" asp-action="Edit" asp-controller="Airline" method="post" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <input type="hidden" name="Id" id="editAirlineId" />
+                    <input type="hidden" name="ExistingLogoPath" id="editExistingLogoPath" />
+
+                    <div class="mb-3">
+                        <label class="form-label">Name</label>
+                        <input type="text" name="Name" id="editAirlineName" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Status</label>
+                        <select name="Status" id="editAirlineStatus" class="form-select">
+                            <option value="Active">Active</option>
+                            <option value="Inactive">Inactive</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Logo</label>
+                        <input type="file" name="LogoFile" class="form-control" accept="image/*" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Current Logo</label><br />
+                        <img id="editAirlineLogo" src="" alt="Logo" class="rounded-circle" style="width: 50px; height: 50px;">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success">Save Changes</button>
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 </div>
             </form>

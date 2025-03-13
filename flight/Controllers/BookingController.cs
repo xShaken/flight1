@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using Microsoft.AspNetCore.Identity;
 using System.Security.Claims;
+using flight.Services.flight.Services;
 
 namespace flight.Controllers
 {
@@ -37,13 +38,9 @@ namespace flight.Controllers
         {
             try
             {
-                // Log the incoming bookingId
-                Console.WriteLine($"Processing payment for bookingId: {bookingId}");
-
                 // Validate bookingId
                 if (bookingId <= 0)
                 {
-                    Console.WriteLine("Invalid booking ID.");
                     return BadRequest(new { message = "Invalid booking ID." });
                 }
 
@@ -54,12 +51,8 @@ namespace flight.Controllers
 
                 if (booking == null)
                 {
-                    Console.WriteLine("Booking not found.");
                     return NotFound(new { message = "Booking not found." });
                 }
-
-                // Log the booking details
-                Console.WriteLine($"Booking found: Id={booking.Id}, TotalPrice={booking.TotalPrice}");
 
                 // Create a payment intent
                 var totalAmount = booking.TotalPrice;
@@ -67,12 +60,8 @@ namespace flight.Controllers
 
                 if (string.IsNullOrEmpty(paymentIntentId))
                 {
-                    Console.WriteLine("Failed to create payment intent.");
                     return BadRequest(new { message = "Failed to create payment intent." });
                 }
-
-                // Log the payment intent ID
-                Console.WriteLine($"Payment intent created: {paymentIntentId}");
 
                 // Save the payment to the database
                 var payment = new Payment
@@ -86,15 +75,11 @@ namespace flight.Controllers
                 _context.Payments.Add(payment);
                 await _context.SaveChangesAsync();
 
-                // Log the successful payment
-                Console.WriteLine("Payment saved to the database.");
-
                 // Return the payment intent ID to the client
                 return Json(new { paymentIntentId });
             }
             catch (Exception ex)
             {
-                // Log the exception
                 Console.WriteLine($"Error in ProcessPayment: {ex.Message}");
                 return StatusCode(500, new { message = "An error occurred while processing your payment. Please try again." });
             }
@@ -233,6 +218,9 @@ namespace flight.Controllers
 
             booking.TotalPrice = (model.NumberOfAdults * (departurePrice + returnPrice)) +
                                  (model.NumberOfChildren * (departurePrice + returnPrice) * 0.75m);
+
+            // Update the booking status to "Confirmed"
+            booking.Status = "Confirmed";
 
             // Save the updated booking to the database
             _context.Bookings.Update(booking);

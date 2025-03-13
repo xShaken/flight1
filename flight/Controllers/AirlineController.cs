@@ -40,6 +40,13 @@ namespace flight.Controllers
             {
                 if (LogoFile != null && LogoFile.Length > 0)
                 {
+                    // Check if the file is an image
+                    if (!LogoFile.ContentType.StartsWith("image/"))
+                    {
+                        ModelState.AddModelError("LogoFile", "Only image files are allowed.");
+                        return View("Airlines", _context.Airlines.ToList());
+                    }
+
                     string uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "images");
 
                     if (!Directory.Exists(uploadsFolder))
@@ -84,6 +91,13 @@ namespace flight.Controllers
                 // Retain existing logo if no new file is uploaded
                 if (LogoFile != null && LogoFile.Length > 0)
                 {
+                    // Check if the file is an image
+                    if (!LogoFile.ContentType.StartsWith("image/"))
+                    {
+                        ModelState.AddModelError("LogoFile", "Only image files are allowed.");
+                        return View("Airlines", _context.Airlines.ToList());
+                    }
+
                     string uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "images");
 
                     if (!Directory.Exists(uploadsFolder))
