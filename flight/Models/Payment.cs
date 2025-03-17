@@ -14,13 +14,17 @@ namespace flight.Models
         public Booking Booking { get; set; }
 
         [Required]
-        public string PaymentIntentId { get; set; }
-
         [Column(TypeName = "decimal(18,2)")]
         public decimal Amount { get; set; }
 
-        public string Status { get; set; } = "Pending";
-
+        [Required]
         public DateTime PaymentDate { get; set; } = DateTime.UtcNow;
+
+        [Required]
+        public string Status { get; set; } // "Pending", "Completed", "Failed", "Refunded"
+
+        public string PaymentMethod { get; set; } // "Credit Card", "PayPal", etc.
+
+        public string TransactionId { get; set; } // Unique identifier for the transaction
     }
 }

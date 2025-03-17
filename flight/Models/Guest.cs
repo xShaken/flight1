@@ -13,18 +13,10 @@ namespace flight.Models
         [Required(ErrorMessage = "Last name is required.")]
         public string LastName { get; set; }
 
-        [Required(ErrorMessage = "Title is required.")]
-
-        public string Title { get; set; } // Mr, Mrs, Ms, Dr
-
         [Required(ErrorMessage = "Date of birth is required.")]
         public DateTime DateOfBirth { get; set; }
 
-        [Required(ErrorMessage = "Nationality is required.")]
-        public string Nationality { get; set; }
-
-       
-
+      
         [Required(ErrorMessage = "IsChild is required.")]
         public bool IsChild { get; set; } // Indicates if the guest is a child
 

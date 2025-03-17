@@ -44,6 +44,13 @@ namespace flight.Models
         public string Status { get; set; } = "Pending";
 
         public List<Guest> Guests { get; set; } = new List<Guest>();
-        public Payment Payment { get; set; }
+        public Payment Payment { get; set; } = new Payment
+        {
+            PaymentMethod = "Credit Card", // Set a default value
+            Status = "Pending", // Set a default value
+            TransactionId = Guid.NewGuid().ToString(), // Generate a default value
+            Amount = 0, // Set a default value
+            PaymentDate = DateTime.UtcNow // Set a default value
+        };
     }
 }

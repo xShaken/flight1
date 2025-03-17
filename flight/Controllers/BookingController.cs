@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using flight.Data;
 using flight.Models;
-using flight.Services;
 using flight.ViewModels;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,21 +8,18 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using System;
 using Microsoft.AspNetCore.Identity;
-using System.Security.Claims;
-using flight.Services.flight.Services;
+using Microsoft.AspNetCore.Authorization;
 
 namespace flight.Controllers
 {
     public class BookingController : Controller
     {
         private readonly AppDbContext _context;
-        private readonly PayMongoService _payMongoService;
         private readonly UserManager<Users> _userManager;
 
-        public BookingController(AppDbContext context, PayMongoService payMongoService, UserManager<Users> userManager)
+        public BookingController(AppDbContext context, UserManager<Users> userManager)
         {
             _context = context;
-            _payMongoService = payMongoService;
             _userManager = userManager;
         }
 
@@ -47,6 +43,7 @@ namespace flight.Controllers
                 // Fetch the booking from the database
                 var booking = await _context.Bookings
                     .Include(b => b.Flight)
+                    .Include(b => b.Payment) // Include Payment to check if it exists
                     .FirstOrDefaultAsync(b => b.Id == bookingId);
 
                 if (booking == null)
@@ -54,29 +51,46 @@ namespace flight.Controllers
                     return NotFound(new { message = "Booking not found." });
                 }
 
-                // Create a payment intent
-                var totalAmount = booking.TotalPrice;
-                var paymentIntentId = await _payMongoService.CreatePaymentIntent(totalAmount);
+                // Check if a payment already exists for this booking
+                var payment = booking.Payment;
 
-                if (string.IsNullOrEmpty(paymentIntentId))
+                if (payment == null)
                 {
-                    return BadRequest(new { message = "Failed to create payment intent." });
+                    // Create a new payment if it doesn't exist
+                    payment = new Payment
+                    {
+                        BookingId = bookingId,
+                        Amount = booking.TotalPrice,
+                        PaymentDate = DateTime.UtcNow,
+                        Status = "Completed", // Mark as completed since we're simulating success
+                        PaymentMethod = "Credit Card", // Ensure this is set to a non-null value
+                        TransactionId = Guid.NewGuid().ToString() // Generate a unique transaction ID
+                    };
+
+                    // Add the new payment to the database
+                    _context.Payments.Add(payment);
+                }
+                else
+                {
+                    // Update the existing payment
+                    payment.Amount = booking.TotalPrice;
+                    payment.PaymentDate = DateTime.UtcNow;
+                    payment.Status = "Completed";
+                    payment.PaymentMethod = "Credit Card";
+                    payment.TransactionId = Guid.NewGuid().ToString();
+
+                    // Mark the payment as updated
+                    _context.Payments.Update(payment);
                 }
 
-                // Save the payment to the database
-                var payment = new Payment
-                {
-                    BookingId = bookingId,
-                    PaymentIntentId = paymentIntentId,
-                    Amount = totalAmount,
-                    Status = "Pending"
-                };
+                // Update booking status to confirmed
+                booking.Status = "Confirmed";
 
-                _context.Payments.Add(payment);
+                // Save changes to the database
                 await _context.SaveChangesAsync();
 
-                // Return the payment intent ID to the client
-                return Json(new { paymentIntentId });
+                // Return success
+                return Json(new { success = true, redirectUrl = $"/Booking/Confirmation/{bookingId}" });
             }
             catch (Exception ex)
             {
@@ -116,7 +130,7 @@ namespace flight.Controllers
             {
                 DepartureFlights = departureFlights,
                 ReturnFlights = returnFlights,
-                IsRoundTrip = tripType == "roundtrip", // Ensure this is set correctly
+                IsRoundTrip = tripType == "roundtrip",
                 NumberOfAdults = numberOfAdults,
                 NumberOfChildren = numberOfChildren
             };
@@ -124,8 +138,14 @@ namespace flight.Controllers
         }
 
         [HttpGet]
-        public IActionResult SelectFlights(int departureFlightId, int returnFlightId, string seatClass, int numberOfAdults, int numberOfChildren)
+        public async Task<IActionResult> SelectFlights(int departureFlightId, int returnFlightId, string seatClass, int numberOfAdults, int numberOfChildren)
         {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
             var departureFlight = _context.Flights
                 .Include(f => f.DepartureAirport)
                 .Include(f => f.ArrivalAirport)
@@ -137,7 +157,7 @@ namespace flight.Controllers
             }
 
             Flight returnFlight = null;
-            if (returnFlightId != 0) // Check if return flight is selected
+            if (returnFlightId != 0)
             {
                 returnFlight = _context.Flights
                     .Include(f => f.DepartureAirport)
@@ -162,21 +182,21 @@ namespace flight.Controllers
             var booking = new Booking
             {
                 FlightId = departureFlightId,
-                ReturnFlightId = returnFlightId != 0 ? returnFlightId : (int?)null, // Set to null if no return flight
+                ReturnFlightId = returnFlightId != 0 ? returnFlightId : (int?)null,
                 SeatClass = seatClass,
                 NumberOfAdults = numberOfAdults,
                 NumberOfChildren = numberOfChildren,
-                TotalPrice = totalPrice, // Set the calculated total price
+                TotalPrice = totalPrice,
                 DepartureDate = departureFlight.DepartureDateTime,
                 ReturnDate = returnFlight?.DepartureDateTime,
                 Status = "Pending",
-                UserId = null // Allow null for guest bookings
+                UserId = user.Id // Associate the booking with the current user
             };
 
             _context.Bookings.Add(booking);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
-            // Create the FlightSelectionViewModel with the BookingId
+            // Create the FlightSelectionViewModel with the BookingId and UserId
             var model = new FlightSelectionViewModel
             {
                 DepartureFlight = departureFlight,
@@ -184,7 +204,8 @@ namespace flight.Controllers
                 SeatClass = seatClass,
                 NumberOfAdults = numberOfAdults,
                 NumberOfChildren = numberOfChildren,
-                BookingId = booking.Id // Set the BookingId
+                BookingId = booking.Id,
+                UserId = user.Id // Ensure this is set
             };
 
             return View("GuestInformation", model);
@@ -202,6 +223,7 @@ namespace flight.Controllers
             var booking = _context.Bookings
                 .Include(b => b.Flight)
                 .Include(b => b.ReturnFlight)
+                .Include(b => b.Payment)
                 .FirstOrDefault(b => b.Id == model.BookingId);
 
             if (booking == null)
@@ -209,24 +231,39 @@ namespace flight.Controllers
                 return NotFound("Booking not found.");
             }
 
+            // Ensure the UserId is set
+            booking.UserId = model.UserId;
+
             // Update the booking with passenger information
             booking.Guests = guests;
-
-            // Calculate the total price
-            decimal departurePrice = GetPriceBySeatClass(booking.Flight, model.SeatClass);
-            decimal returnPrice = booking.ReturnFlight != null ? GetPriceBySeatClass(booking.ReturnFlight, model.SeatClass) : 0;
-
-            booking.TotalPrice = (model.NumberOfAdults * (departurePrice + returnPrice)) +
-                                 (model.NumberOfChildren * (departurePrice + returnPrice) * 0.75m);
-
-            // Update the booking status to "Confirmed"
-            booking.Status = "Confirmed";
 
             // Save the updated booking to the database
             _context.Bookings.Update(booking);
             _context.SaveChanges();
 
             // Pass the booking to the BookingSummary view
+            return View("BookingSummary", booking);
+        }
+
+        [HttpGet]
+        public IActionResult Confirmation(int id)
+        {
+            var booking = _context.Bookings
+                .Include(b => b.Flight)
+                .Include(b => b.Flight.DepartureAirport)
+                .Include(b => b.Flight.ArrivalAirport)
+                .Include(b => b.ReturnFlight)
+                .Include(b => b.ReturnFlight.DepartureAirport)
+                .Include(b => b.ReturnFlight.ArrivalAirport)
+                .Include(b => b.Guests)
+                .Include(b => b.Payment)
+                .FirstOrDefault(b => b.Id == id);
+
+            if (booking == null)
+            {
+                return NotFound("Booking not found.");
+            }
+
             return View("BookingSummary", booking);
         }
 
@@ -239,6 +276,32 @@ namespace flight.Controllers
                 "FirstClass" => flight.FirstClassPrice,
                 _ => 0
             };
+        }
+
+        public async Task<IActionResult> History()
+        {
+            // Get the current user
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            // Fetch bookings for the current user, including Payment
+            var bookings = await _context.Bookings
+                .Include(b => b.Flight)
+                .Include(b => b.Flight.DepartureAirport)
+                .Include(b => b.Flight.ArrivalAirport)
+                .Include(b => b.ReturnFlight)
+                .Include(b => b.ReturnFlight.DepartureAirport)
+                .Include(b => b.ReturnFlight.ArrivalAirport)
+                .Include(b => b.Guests)
+                .Include(b => b.Payment) // Ensure Payment is included
+                .Where(b => b.UserId == user.Id)
+                .OrderByDescending(b => b.DepartureDate)
+                .ToListAsync();
+
+            return View(bookings);
         }
     }
 }

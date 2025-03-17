@@ -67,7 +67,7 @@
                 <input type="hidden" asp-for="SeatClass" />
                 <input type="hidden" asp-for="NumberOfAdults" />
                 <input type="hidden" asp-for="NumberOfChildren" />
-                <input type="hidden" asp-for="UserId" value="@(string.IsNullOrEmpty(Model.UserId) ? null : Model.UserId)" />
+               <input type="hidden" asp-for="UserId" />
                 <input type="hidden" asp-for="BookingId" value="@Model.BookingId" />
 
                 <h4>Adult Passengers (@Model.NumberOfAdults)</h4>
@@ -249,8 +249,7 @@
                         </div>
                     </div>
                 </div>
-
-                <div class="d-grid gap-2">
+                <div id="paymentStatus" class="mb-3">
                     <button id="processPaymentButton" class="btn btn-primary">Proceed to Payment</button>
                 </div>
             </form>
@@ -295,9 +294,23 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         $(document).ready(function () {
+            // Handle "Same as first adult passenger" checkbox
+            $("#sameAsPassenger").change(function () {
+                if ($(this).is(":checked")) {
+                    $("#contactInfo").hide();
+                } else {
+                    $("#contactInfo").show();
+                }
+            });
+
             // Handle the "Proceed to Payment" button click
             $("#processPaymentButton").click(function (e) {
-                e.preventDefault(); // Prevent the form from submitting
+                e.preventDefault(); // Prevent the form from submitting directly
+
+                // Validate form before proceeding
+                if (!validateForm()) {
+                    return;
+                }
 
                 // Get the bookingId from the hidden field
                 const bookingId = $("#BookingId").val();
@@ -308,25 +321,89 @@
                     return;
                 }
 
+                // Show loading indicator
+                $("#processPaymentButton").prop("disabled", true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...');
+
+                // Submit the form data first to save guest information
+                let formData = $("#booking-form").serialize();
+
+                $.ajax({
+                    url: $("#booking-form").attr("action"),
+                    type: "POST",
+                    data: formData,
+                    success: function (response) {
+                        // Now process the payment
+                        processPayment(bookingId);
+                    },
+                    error: function (error) {
+                        console.error("Error saving guest information:", error);
+                        alert("An error occurred while saving your information. Please try again.");
+                        $("#processPaymentButton").prop("disabled", false).html('Proceed to Payment');
+                    }
+                });
+            });
+
+            function processPayment(bookingId) {
+                // Show payment processing message
+                $("#paymentStatus").html('<div class="alert alert-info">Processing your payment...</div>');
+
                 // Send the AJAX request to process the payment
                 $.ajax({
-                    url: '/Booking/ProcessPayment', // URL of the ProcessPayment action
-                    type: 'POST', // HTTP method
-                    data: { bookingId: bookingId }, // Data to send (bookingId)
+                    url: '/Booking/ProcessPayment',
+                    type: 'POST',
+                    data: { bookingId: bookingId },
                     success: function (response) {
-                        // Handle the successful response
-                        console.log('Payment processed successfully:', response);
-                        alert('Payment processed successfully!');
-                        // Optionally, redirect to a confirmation page
-                        window.location.href = '/Booking/Confirmation';
+                        if (response.success) {
+                            // Show success message
+                            $("#paymentStatus").html('<div class="alert alert-success">Payment processed successfully!</div>');
+
+                            // Redirect to confirmation page after a short delay
+                            setTimeout(function () {
+                                window.location.href = response.redirectUrl;
+                            }, 1500);
+                        } else {
+                            // Handle unexpected response
+                            $("#paymentStatus").html('<div class="alert alert-danger">An error occurred. Please try again.</div>');
+                            $("#processPaymentButton").prop("disabled", false).html('Proceed to Payment');
+                        }
                     },
                     error: function (error) {
                         // Handle errors
                         console.error('Error processing payment:', error);
-                        alert('An error occurred while processing the payment. Please try again.');
+                        $("#paymentStatus").html('<div class="alert alert-danger">Payment failed. Please try again.</div>');
+                        $("#processPaymentButton").prop("disabled", false).html('Proceed to Payment');
                     }
                 });
-            });
+            }
+
+            function validateForm() {
+                // Basic form validation
+                let isValid = true;
+
+                // Check required fields
+                $("#booking-form input[required]").each(function () {
+                    if ($(this).val().trim() === '') {
+                        $(this).addClass('is-invalid');
+                        isValid = false;
+                    } else {
+                        $(this).removeClass('is-invalid');
+                    }
+                });
+
+                // Check terms and conditions
+                if (!$("#termsAccepted").is(":checked")) {
+                    $("#termsAccepted").addClass('is-invalid');
+                    isValid = false;
+                } else {
+                    $("#termsAccepted").removeClass('is-invalid');
+                }
+
+                if (!isValid) {
+                    alert("Please fill in all required fields and accept the terms and conditions.");
+                }
+
+                return isValid;
+            }
         });
     </script>
 }
