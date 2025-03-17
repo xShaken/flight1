@@ -52,6 +52,10 @@ builder.Services.AddHttpClient<PayMongoService>((serviceProvider, client) =>
     client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(Encoding.ASCII.GetBytes(config.SecretKey)));
 });
 
+//Recaptcha
+builder.Services.AddHttpClient<ReCaptchaService>();
+
+
 var app = builder.Build();
 
 // Seed the database

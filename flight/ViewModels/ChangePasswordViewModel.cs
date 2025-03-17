@@ -21,5 +21,7 @@ namespace flight.ViewModels
         [Display(Name = "Confirm New Password")]
 
         public string ConfirmNewPassword { get; set; }
+
+        public string RecaptchaResponse { get; set; }
     }
 }

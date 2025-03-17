@@ -5,12 +5,13 @@ namespace flight.ViewModels
     {
         [Required(ErrorMessage = "Name is required")]
         public string Name { get; set; }
+
         [Required(ErrorMessage = "Email is required")]
         [EmailAddress]
         public string Email { get; set; }
 
         [Required(ErrorMessage = "Password is required")]
-        [StringLength(40, MinimumLength = 8, ErrorMessage ="The {0} must be at least {2} characters long and at max {1} characters long.")]
+        [StringLength(40, MinimumLength = 8, ErrorMessage = "The {0} must be at least {2} characters long and at max {1} characters long.")]
         [DataType(DataType.Password)]
         [Compare("ConfirmPassword", ErrorMessage = "The password and confirmation password do not match.")]
         public string Password { get; set; }
@@ -20,5 +21,7 @@ namespace flight.ViewModels
         [Display(Name = "Confirm Password")]
         public string ConfirmPassword { get; set; }
 
+        // Property to store the reCAPTCHA response token
+        public string RecaptchaResponse { get; set; }
     }
 }

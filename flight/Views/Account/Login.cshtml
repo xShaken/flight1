@@ -30,7 +30,7 @@
                     Forgot Password?
                 </a>
             </div>
-
+            <input type="hidden" id="g-recaptcha-response" name="RecaptchaResponse">
             <div class="form-check mb-3">
                 <label class="form-check-label">
                     <input asp-for="RememberMe" class="form-check-input" />
@@ -43,10 +43,11 @@
             <p class="text-center mt-2">
                 Don't have an account? <a asp-controller="Account" asp-action="Register" class="text-decoration-none">Register</a>
             </p>
-
+           
             <div class="text-center">
                 <a asp-controller="Home" asp-action="Landingpage" class="text-decoration-none mt-3">Back</a>
             </div>
+            
         </form>
     </div>
 </div>
@@ -56,3 +57,11 @@
         await Html.RenderPartialAsync("_ValidationScriptsPartial.cshtml");
     }
 }
+<script src="https://www.google.com/recaptcha/api.js?render=6LcRtvMqAAAAADA0yNToinT5cj9rCnuKWId97Ytm"></script>
+<script>
+    grecaptcha.ready(function () {
+        grecaptcha.execute('6LcRtvMqAAAAADA0yNToinT5cj9rCnuKWId97Ytm', { action: 'submit' }).then(function (token) {
+            document.getElementById('g-recaptcha-response').value = token;
+        });
+    });
+</script>

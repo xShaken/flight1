@@ -43,7 +43,7 @@
                 Already have an account?
                 <a asp-controller="Account" asp-action="Login" class="text-decoration-none">Login</a>
             </p>
-
+            <input type="hidden" id="g-recaptcha-response" name="RecaptchaResponse">
             <div class="text-center">
                 <a asp-controller="Home" asp-action="Landingpage" class="text-decoration-none mt-3">Back</a>
             </div>
@@ -56,3 +56,11 @@
         await Html.RenderPartialAsync("_ValidationScriptsPartial.cshtml");
     }
 }
+<script src="https://www.google.com/recaptcha/api.js?render=6LcRtvMqAAAAADA0yNToinT5cj9rCnuKWId97Ytm"></script>
+<script>
+    grecaptcha.ready(function () {
+        grecaptcha.execute('6LcRtvMqAAAAADA0yNToinT5cj9rCnuKWId97Ytm', { action: 'submit' }).then(function (token) {
+            document.getElementById('g-recaptcha-response').value = token;
+        });
+    });
+</script>
