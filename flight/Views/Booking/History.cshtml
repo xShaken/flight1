@@ -5,7 +5,7 @@
 }
 
 <div class="container">
-    <h2>Booking History</h2>
+    <h2 class="mb-4">Booking History</h2>
 
     @if (!Model.Any())
     {
@@ -15,67 +15,82 @@
     }
     else
     {
-        <div class="list-group">
-            @foreach (var booking in Model)
-            {
-                <div class="list-group-item mb-3">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h5>Booking Reference: @booking.Id</h5>
-                        <span class="badge bg-primary">@booking.Status</span>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <h6>Departure Flight</h6>
-                            <p>
-                                <strong>From:</strong> @booking.Flight.DepartureAirport.Name<br />
-                                <strong>To:</strong> @booking.Flight.ArrivalAirport.Name<br />
-                                <strong>Date:</strong> @booking.Flight.DepartureDateTime.ToShortDateString()<br />
-                                <strong>Time:</strong> @booking.Flight.DepartureDateTime.ToString("hh:mm tt") - @booking.Flight.EstimatedArrivalDateTime.ToString("hh:mm tt")<br />
-                                <strong>Class:</strong> @booking.SeatClass
-                            </p>
-                        </div>
-                        @if (booking.ReturnFlight != null)
-                        {
-                            <div class="col-md-6">
-                                <h6>Return Flight</h6>
-                                <p>
-                                    <strong>From:</strong> @booking.ReturnFlight.DepartureAirport.Name<br />
-                                    <strong>To:</strong> @booking.ReturnFlight.ArrivalAirport.Name<br />
-                                    <strong>Date:</strong> @booking.ReturnFlight.DepartureDateTime.ToShortDateString()<br />
-                                    <strong>Time:</strong> @booking.ReturnFlight.DepartureDateTime.ToString("hh:mm tt") - @booking.ReturnFlight.EstimatedArrivalDateTime.ToString("hh:mm tt")<br />
-                                    <strong>Class:</strong> @booking.SeatClass
-                                </p>
-                            </div>
-                        }
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <h6>Passengers</h6>
-                            <ul>
-                                @foreach (var guest in booking.Guests)
+        <div class="table-responsive">
+            <table class="table table-hover table-striped table-bordered">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>Booking ID</th>
+                        <th>Departure</th>
+                        <th>Arrival</th>
+                        <th>Date</th>
+                        <th>Class</th>
+                        <th>Passengers</th>
+                        <th>Payment Status</th>
+                        <th>Total Price</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var booking in Model)
+                    {
+                        <tr>
+                            <td class="align-middle">@booking.Id</td>
+                            <td class="align-middle">
+                                <div class="flight-details">
+                                    <strong>From:</strong> @booking.Flight.DepartureAirport.Name<br />
+                                    <strong>To:</strong> @booking.Flight.ArrivalAirport.Name<br />
+                                    <strong>Time:</strong> @booking.Flight.DepartureDateTime.ToString("hh:mm tt") - @booking.Flight.EstimatedArrivalDateTime.ToString("hh:mm tt")
+                                </div>
+                            </td>
+                            <td class="align-middle">
+                                @if (booking.ReturnFlight != null)
                                 {
-                                    <li>@guest.FirstName @guest.LastName (@(guest.IsChild ? "Child" : "Adult"))</li>
+                                    <div class="flight-details">
+                                        <strong>From:</strong> @booking.ReturnFlight.DepartureAirport.Name<br />
+                                        <strong>To:</strong> @booking.ReturnFlight.ArrivalAirport.Name<br />
+                                        <strong>Time:</strong> @booking.ReturnFlight.DepartureDateTime.ToString("hh:mm tt") - @booking.ReturnFlight.EstimatedArrivalDateTime.ToString("hh:mm tt")
+                                    </div>
                                 }
-                            </ul>
-                        </div>
-                        <div class="col-md-6">
-                            <h6>Payment Details</h6>
-                            <p>
-                                <strong>Total Price:</strong> ₱@booking.TotalPrice.ToString("N2")<br />
+                                else
+                                {
+                                    <span class="text-muted">No return flight</span>
+                                }
+                            </td>
+                            <td class="align-middle">@booking.Flight.DepartureDateTime.ToShortDateString()</td>
+                            <td class="align-middle">@booking.SeatClass</td>
+                            <td class="align-middle">
+                                <ul class="list-unstyled mb-0">
+                                    @foreach (var guest in booking.Guests)
+                                    {
+                                        <li>@guest.FirstName @guest.LastName (@(guest.IsChild ? "Child" : "Adult"))</li>
+                                    }
+                                </ul>
+                            </td>
+                            <td class="align-middle">
                                 @if (booking.Payment != null)
                                 {
-                                    <strong>Payment Status:</strong> @booking.Payment.Status
+                                    <span class="badge bg-success">@booking.Payment.Status</span>
 
                                     <br />
-                                    <strong>Payment Date:</strong> @booking.Payment.PaymentDate.ToShortDateString()
+                                    <small>@booking.Payment.PaymentDate.ToShortDateString()</small>
                                 }
-                                <strong>Payment Status:</strong> @booking.Payment.Status<br />
-                                <strong>Payment Date:</strong> @booking.Payment.PaymentDate.ToShortDateString()
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            }
+                                else
+                                {
+                                    <span class="badge bg-warning">Pending</span>
+                                }
+                            </td>
+                            <td class="align-middle">₱@booking.TotalPrice.ToString("N2")</td>
+                            <td class="align-middle">
+                                @if (booking.Status == "Confirmed")
+                                {
+                                    <a href="/Booking/Ticket/@booking.Id" class="btn btn-primary btn-sm">View Ticket</a>
+                                    <a href="/Booking/FlightStatus/@booking.Flight.Id" class="btn btn-info btn-sm">View Flight Status</a>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
         </div>
     }
 </div>

@@ -1,0 +1,154 @@
+﻿@model flight.Models.Booking
+
+@{
+    ViewData["Title"] = "Flight Ticket";
+    var flight = ViewBag.Flight as Flight;
+    var guest = ViewBag.Guest as Guest;
+    var guestIndex = ViewBag.GuestIndex ?? 0; // Default to 0 if null
+    var isReturn = ViewBag.IsReturn ?? false; // Default to false if null
+    var totalGuests = ViewBag.TotalGuests ?? 0; // Default to 0 if null
+    var bookingId = ViewBag.BookingId ?? 0; // Default to 0 if null
+}
+
+@if (flight == null || guest == null)
+{
+    <div class="alert alert-danger">
+        <strong>Error:</strong> Flight or guest data is missing.
+    </div>
+}
+else
+{
+    <div class="box">
+        <ul class="left">
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+        </ul>
+
+        <ul class="right">
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+        </ul>
+
+        <div class="ticket">
+            <span class="airline">@flight.Airline?.Name</span>
+            <span class="airline airlineslip">@flight.Airline?.Name</span>
+            <span class="boarding">@Model.SeatClass</span>
+            <div class="content">
+                <span class="jfk">@flight.DepartureAirport?.Code</span>
+                <span class="plane">
+                    <svg clip-rule="evenodd" fill-rule="evenodd" height="60" width="60" image-rendering="optimizeQuality" shape-rendering="geometricPrecision" text-rendering="geometricPrecision" viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg">
+                        <g stroke="#222">
+                            <line fill="none" stroke-linecap="round" stroke-width="30" x1="300" x2="55" y1="390" y2="390" />
+                            <path d="M98 325c-9 10 10 16 25 6l311-156c24-17 35-25 42-50 2-15-46-11-78-7-15 1-34 10-42 16l-56 35 1-1-169-31c-14-3-24-5-37-1-10 5-18 10-27 18l122 72c4 3 5 7 1 9l-44 27-75-15c-10-2-18-4-28 0-8 4-14 9-20 15l74 63z" fill="#222" stroke-linejoin="round" stroke-width="10" />
+                        </g>
+                    </svg>
+                </span>
+                <span class="sfo">@flight.ArrivalAirport?.Code</span>
+
+                <span class="jfk jfkslip">@flight.DepartureAirport?.Code</span>
+                <span class="plane planeslip">
+                    <svg clip-rule="evenodd" fill-rule="evenodd" height="50" width="50" image-rendering="optimizeQuality" shape-rendering="geometricPrecision" text-rendering="geometricPrecision" viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg">
+                        <g stroke="#222">
+                            <line fill="none" stroke-linecap="round" stroke-width="30" x1="300" x2="55" y1="390" y2="390" />
+                            <path d="M98 325c-9 10 10 16 25 6l311-156c24-17 35-25 42-50 2-15-46-11-78-7-15 1-34 10-42 16l-56 35 1-1-169-31c-14-3-24-5-37-1-10 5-18 10-27 18l122 72c4 3 5 7 1 9l-44 27-75-15c-10-2-18-4-28 0-8 4-14 9-20 15l74 63z" fill="#222" stroke-linejoin="round" stroke-width="10" />
+                        </g>
+                    </svg>
+                </span>
+                <span class="sfo sfoslip">@flight.ArrivalAirport?.Code</span>
+                <div class="sub-content">
+                    <span class="watermark">AIRVISTA</span>
+                    <span class="name">PASSENGER NAME<br><span>@guest.FirstName @guest.LastName</span></span>
+                    <span class="flight">FLIGHT N&deg;<br><span>@flight.FlightNumber</span></span>
+                    <span class="gate">GATE<br><span>A-6</span></span>
+                    <span class="seat">SEAT<br><span>9A</span></span>
+                    <span class="boardingtime">BOARDING TIME<br><span>@flight.DepartureDateTime.ToString("hh:mm tt") ON @flight.DepartureDateTime.ToString("MMMM yyyy")</span></span>
+
+                    <span class="flight flightslip">FLIGHT N&deg;<br><span>@flight.FlightNumber</span></span>
+                    <span class="seat seatslip">SEAT<br><span>9A</span></span>
+                    <span class="name nameslip">PASSENGER NAME<br><span>@guest.FirstName @guest.LastName</span></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation for multiple guests and roundtrip tickets -->
+        <div class="ticket-navigation">
+            @if (guestIndex > 0)
+            {
+                <a href="@Url.Action("Ticket", new { id = bookingId, guestIndex = guestIndex - 1, isReturn = isReturn })" class="btn btn-primary">Previous Guest</a>
+            }
+            @if (guestIndex < totalGuests - 1)
+            {
+                <a href="@Url.Action("Ticket", new { id = bookingId, guestIndex = guestIndex + 1, isReturn = isReturn })" class="btn btn-primary">Next Guest</a>
+            }
+            @if (Model.ReturnFlight != null && !isReturn)
+            {
+                <a href="@Url.Action("Ticket", new { id = bookingId, guestIndex = guestIndex, isReturn = true })" class="btn btn-primary">Return Flight</a>
+            }
+            @if (Model.ReturnFlight != null && isReturn)
+            {
+                <a href="@Url.Action("Ticket", new { id = bookingId, guestIndex = guestIndex, isReturn = false })" class="btn btn-primary">Departure Flight</a>
+            }
+        </div>
+
+        <!-- Add buttons here -->
+        <div class="ticket-buttons">
+            <button id="cancelTicket" class="btn btn-danger">Cancel Ticket</button>
+            <button id="downloadTicket" class="btn btn-primary">Download Ticket</button>
+        </div>
+    </div>
+}
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script>
+        document.getElementById('cancelTicket').addEventListener('click', function () {
+            if (confirm('Are you sure you want to cancel this ticket?')) {
+                fetch('/Booking/CancelTicket/@Model.Id', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                }).then(response => {
+                    if (response.ok) {
+                        alert('Ticket cancelled successfully.');
+                        window.location.href = '/Booking/History';
+                    } else {
+                        alert('Failed to cancel ticket.');
+                    }
+                });
+            }
+        });
+
+        document.getElementById('downloadTicket').addEventListener('click', function () {
+            html2canvas(document.querySelector(".ticket")).then(canvas => {
+                let link = document.createElement('a');
+                link.download = 'ticket.png';
+                link.href = canvas.toDataURL();
+                link.click();
+            });
+        });
+    </script>
+}

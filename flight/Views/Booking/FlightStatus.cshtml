@@ -1,0 +1,132 @@
+﻿@model flight.Models.Flight
+
+@{
+    ViewData["Title"] = "Flight Status";
+}
+
+<div class="container">
+    <h2 class="mb-4">Flight Status</h2>
+
+    <div class="flight-status-container">
+        <!-- Departure Flight Details -->
+        <div class="flight-info">
+            <h4>Departure Flight</h4>
+            <div class="flight-details">
+                <strong>From:</strong> @Model.DepartureAirport.Name<br />
+                <strong>To:</strong> @Model.ArrivalAirport.Name<br />
+                <strong>Scheduled Departure:</strong> @Model.DepartureDateTime.ToString("yyyy-MM-dd HH:mm")<br />
+                <strong>Scheduled Arrival:</strong> @Model.EstimatedArrivalDateTime.ToString("yyyy-MM-dd HH:mm")
+            </div>
+        </div>
+
+        <!-- Status Indicator for Departure Flight -->
+        <div class="status-indicator">
+            @if (Model.Status == "Departed")
+            {
+                <div class="status departed">Departed</div>
+                <div class="plane-icon" style="left: 50%;"></div>
+            }
+            else if (Model.Status == "Arrived")
+            {
+                <div class="status arrived">Arrived</div>
+                <div class="plane-icon" style="left: 100%;"></div>
+            }
+            else
+            {
+                <div class="status scheduled">Scheduled</div>
+                <div class="plane-icon" style="left: 0%;"></div>
+            }
+        </div>
+
+        <!-- Return Flight Details (if applicable) -->
+        @if (ViewBag.ReturnFlight != null)
+        {
+            <div class="flight-info mt-4">
+                <h4>Return Flight</h4>
+                <div class="flight-details">
+                    <strong>From:</strong> @ViewBag.ReturnFlight.DepartureAirport.Name<br />
+                    <strong>To:</strong> @ViewBag.ReturnFlight.ArrivalAirport.Name<br />
+                    <strong>Scheduled Departure:</strong> @ViewBag.ReturnFlight.DepartureDateTime.ToString("yyyy-MM-dd HH:mm")<br />
+                    <strong>Scheduled Arrival:</strong> @ViewBag.ReturnFlight.EstimatedArrivalDateTime.ToString("yyyy-MM-dd HH:mm")
+                </div>
+            </div>
+
+            <!-- Status Indicator for Return Flight -->
+            <div class="status-indicator mt-3">
+                @if (ViewBag.ReturnFlight.Status == "Departed")
+                {
+                    <div class="status departed">Departed</div>
+                    <div class="plane-icon" style="left: 50%;"></div>
+                }
+                else if (ViewBag.ReturnFlight.Status == "Arrived")
+                {
+                    <div class="status arrived">Arrived</div>
+                    <div class="plane-icon" style="left: 100%;"></div>
+                }
+                else
+                {
+                    <div class="status scheduled">Scheduled</div>
+                    <div class="plane-icon" style="left: 0%;"></div>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+<style>
+    .flight-status-container {
+        border: 1px solid #ddd;
+        padding: 20px;
+        border-radius: 8px;
+        background-color: #f9f9f9;
+    }
+
+    .flight-info {
+        margin-bottom: 20px;
+    }
+
+    .status-indicator {
+        position: relative;
+        height: 40px;
+        background-color: #e0e0e0;
+        border-radius: 20px;
+        overflow: hidden;
+    }
+
+    .status {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        padding: 5px 10px;
+        border-radius: 15px;
+        color: white;
+        font-weight: bold;
+    }
+
+        .status.scheduled {
+            background-color: #4CAF50;
+            left: 10px;
+        }
+
+        .status.departed {
+            background-color: #FF9800;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .status.arrived {
+            background-color: #2196F3;
+            right: 10px;
+        }
+
+    .plane-icon {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 30px;
+        height: 30px;
+        background-color: #333;
+        border-radius: 50%;
+        transition: left 0.5s ease-in-out;
+    }
+</style>

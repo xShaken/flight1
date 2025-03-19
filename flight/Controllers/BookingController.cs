@@ -134,14 +134,36 @@ namespace flight.Controllers
                 // Save changes to the database
                 await _context.SaveChangesAsync();
 
-                // Return success
-                return Json(new { success = true, redirectUrl = $"/Booking/Confirmation/{bookingId}" });
+                // Redirect to the BookingSummary view after successful payment
+                return Json(new { success = true, redirectUrl = $"/Booking/BookingSummary/{bookingId}" });
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error in ProcessPayment: {ex.Message}");
                 return StatusCode(500, new { message = "An error occurred while processing your payment. Please try again." });
             }
+        }
+
+        [HttpGet]
+        public IActionResult BookingSummary(int id)
+        {
+            var booking = _context.Bookings
+                .Include(b => b.Flight)
+                .Include(b => b.Flight.DepartureAirport)
+                .Include(b => b.Flight.ArrivalAirport)
+                .Include(b => b.ReturnFlight)
+                .Include(b => b.ReturnFlight.DepartureAirport)
+                .Include(b => b.ReturnFlight.ArrivalAirport)
+                .Include(b => b.Guests)
+                .Include(b => b.Payment)
+                .FirstOrDefault(b => b.Id == id);
+
+            if (booking == null)
+            {
+                return NotFound("Booking not found.");
+            }
+
+            return View(booking);
         }
 
         [HttpPost]
@@ -254,7 +276,10 @@ namespace flight.Controllers
             };
 
             return View("GuestInformation", model);
+
+
         }
+
 
         [HttpPost]
         public IActionResult Confirmation(FlightSelectionViewModel model, List<Guest> guests)
@@ -322,6 +347,129 @@ namespace flight.Controllers
                 _ => 0
             };
         }
+        [HttpGet]
+        public async Task<IActionResult> Ticket(int id, int? guestIndex = 0, bool isReturn = false)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            // Fetch the booking with all related data
+            var booking = await _context.Bookings
+                .Include(b => b.Flight)
+                    .ThenInclude(f => f.Airline) // Include Airline for departure flight
+                .Include(b => b.Flight.DepartureAirport)
+                .Include(b => b.Flight.ArrivalAirport)
+                .Include(b => b.ReturnFlight)
+                    .ThenInclude(f => f.Airline) // Include Airline for return flight
+                .Include(b => b.ReturnFlight.DepartureAirport)
+                .Include(b => b.ReturnFlight.ArrivalAirport)
+                .Include(b => b.Guests)
+                .Include(b => b.Payment)
+                .FirstOrDefaultAsync(b => b.Id == id && b.UserId == user.Id);
+
+            if (booking == null)
+            {
+                // Log the issue
+                Console.WriteLine($"Booking not found for ID: {id}");
+                return RedirectToAction("History", "Booking");
+            }
+
+            // Ensure the booking is confirmed and payment is completed
+            if (booking.Status != "Confirmed" || booking.Payment == null || booking.Payment.Status != "Completed")
+            {
+                // Log the issue
+                Console.WriteLine($"Booking not confirmed or payment not completed for ID: {id}");
+                return RedirectToAction("History", "Booking");
+            }
+
+            // Determine the flight to display
+            var flight = isReturn ? booking.ReturnFlight : booking.Flight;
+
+            if (flight == null)
+            {
+                return NotFound("Flight not found.");
+            }
+
+            // Get the current guest
+            var guest = booking.Guests.ElementAtOrDefault(guestIndex ?? 0);
+
+            if (guest == null)
+            {
+                return NotFound("Guest not found.");
+            }
+
+            // Pass the flight and guest to the view using ViewBag
+            ViewBag.Flight = flight;
+            ViewBag.Guest = guest;
+            ViewBag.GuestIndex = guestIndex;
+            ViewBag.IsReturn = isReturn;
+            ViewBag.TotalGuests = booking.Guests.Count;
+            ViewBag.BookingId = booking.Id; // Ensure BookingId is set
+
+            // Pass the booking to the view
+            return View(booking);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CancelTicket(int id)
+        {
+            var booking = await _context.Bookings
+                .Include(b => b.Flight)
+                .Include(b => b.ReturnFlight)
+                .FirstOrDefaultAsync(b => b.Id == id);
+
+            if (booking == null)
+            {
+                return NotFound();
+            }
+
+            int totalGuests = booking.NumberOfAdults + booking.NumberOfChildren;
+
+            // Return seats for the departure flight
+            if (booking.Flight != null)
+            {
+                switch (booking.SeatClass)
+                {
+                    case "Economy":
+                        booking.Flight.EconomySeatsAvailable += totalGuests;
+                        break;
+                    case "Business":
+                        booking.Flight.BusinessSeatsAvailable += totalGuests;
+                        break;
+                    case "FirstClass":
+                        booking.Flight.FirstClassSeatsAvailable += totalGuests;
+                        break;
+                }
+                _context.Flights.Update(booking.Flight);
+            }
+
+            // Return seats for the return flight if it exists
+            if (booking.ReturnFlight != null)
+            {
+                switch (booking.SeatClass)
+                {
+                    case "Economy":
+                        booking.ReturnFlight.EconomySeatsAvailable += totalGuests;
+                        break;
+                    case "Business":
+                        booking.ReturnFlight.BusinessSeatsAvailable += totalGuests;
+                        break;
+                    case "FirstClass":
+                        booking.ReturnFlight.FirstClassSeatsAvailable += totalGuests;
+                        break;
+                }
+                _context.Flights.Update(booking.ReturnFlight);
+            }
+
+            booking.Status = "Cancelled";
+            _context.Bookings.Update(booking);
+            await _context.SaveChangesAsync();
+
+            return Ok();
+        }
 
         public async Task<IActionResult> History()
         {
@@ -332,7 +480,7 @@ namespace flight.Controllers
                 return RedirectToAction("Login", "Account");
             }
 
-            // Fetch bookings for the current user, including Payment
+            // Fetch confirmed bookings for the current user
             var bookings = await _context.Bookings
                 .Include(b => b.Flight)
                 .Include(b => b.Flight.DepartureAirport)
@@ -341,12 +489,48 @@ namespace flight.Controllers
                 .Include(b => b.ReturnFlight.DepartureAirport)
                 .Include(b => b.ReturnFlight.ArrivalAirport)
                 .Include(b => b.Guests)
-                .Include(b => b.Payment) // Ensure Payment is included
-                .Where(b => b.UserId == user.Id)
+                .Include(b => b.Payment)
+                .Where(b => b.UserId == user.Id && b.Status == "Confirmed")
                 .OrderByDescending(b => b.DepartureDate)
                 .ToListAsync();
 
             return View(bookings);
+        }
+      
+        [HttpGet]
+        public async Task<IActionResult> FlightStatus(int id)
+        {
+            // Fetch the departure flight
+            var flight = await _context.Flights
+                .Include(f => f.DepartureAirport)
+                .Include(f => f.ArrivalAirport)
+                .FirstOrDefaultAsync(f => f.Id == id);
+
+            if (flight == null)
+            {
+                return NotFound("Flight not found.");
+            }
+
+            // Check if this flight is part of a roundtrip booking
+            var booking = await _context.Bookings
+                .Include(b => b.ReturnFlight)
+                .ThenInclude(f => f.DepartureAirport)
+                .Include(b => b.ReturnFlight)
+                .ThenInclude(f => f.ArrivalAirport)
+                .FirstOrDefaultAsync(b => b.FlightId == id || b.ReturnFlightId == id);
+
+            if (booking != null && booking.ReturnFlightId.HasValue && booking.ReturnFlightId != id)
+            {
+                // Fetch the return flight details
+                var returnFlight = await _context.Flights
+                    .Include(f => f.DepartureAirport)
+                    .Include(f => f.ArrivalAirport)
+                    .FirstOrDefaultAsync(f => f.Id == booking.ReturnFlightId);
+
+                ViewBag.ReturnFlight = returnFlight;
+            }
+
+            return View(flight);
         }
     }
 }
