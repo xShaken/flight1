@@ -43,18 +43,46 @@ namespace flight.Data
                 .HasForeignKey(f => f.ArrivalAirportId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Correctly configure the relationship between Booking and Guest
+            // Configure the relationship between Booking and Flight
+            builder.Entity<Booking>()
+                .HasOne(b => b.Flight) // A Booking has one Flight
+                .WithMany(f => f.Bookings) // A Flight has many Bookings
+                .HasForeignKey(b => b.FlightId) // Foreign key in Booking
+                .OnDelete(DeleteBehavior.Restrict); // Define delete behavior
+
+            // Configure the relationship between Booking and ReturnFlight
+            builder.Entity<Booking>()
+                .HasOne(b => b.ReturnFlight) // A Booking has one ReturnFlight
+                .WithMany() // No navigation property back to Booking in Flight
+                .HasForeignKey(b => b.ReturnFlightId) // Foreign key in Booking
+                .OnDelete(DeleteBehavior.Restrict); // Define delete behavior
+
+            // Configure the relationship between Booking and User
+            builder.Entity<Booking>()
+                .HasOne(b => b.User) // A Booking has one User
+                .WithMany() // No navigation property back to Booking in User
+                .HasForeignKey(b => b.UserId) // Foreign key in Booking
+                .OnDelete(DeleteBehavior.Restrict); // Define delete behavior
+
+            // Configure the relationship between Booking and Guest
             builder.Entity<Booking>()
                 .HasMany(b => b.Guests) // Booking has many Guests
                 .WithOne(g => g.Booking) // Guest has one Booking
                 .HasForeignKey(g => g.BookingId) // Foreign key in Guest
                 .OnDelete(DeleteBehavior.Cascade); // Cascade delete
 
+            // Configure the relationship between Booking and Payment
+            builder.Entity<Booking>()
+                .HasOne(b => b.Payment) // Booking has one Payment
+                .WithOne(p => p.Booking) // Payment has one Booking
+                .HasForeignKey<Payment>(p => p.BookingId) // Foreign key in Payment
+                .OnDelete(DeleteBehavior.Cascade); // Cascade delete
+
             builder.Entity<Payment>()
-        .HasOne(p => p.Booking)
-        .WithOne(b => b.Payment)
-        .HasForeignKey<Payment>(p => p.BookingId)
-        .OnDelete(DeleteBehavior.Cascade);
+            .HasOne(p => p.Booking)
+             .WithOne(b => b.Payment)
+            .HasForeignKey<Payment>(p => p.BookingId)
+            .OnDelete(DeleteBehavior.Cascade);
 
 
 

@@ -1,11 +1,9 @@
 ﻿using flight.Data;
 using flight.Models;
 using flight.Services;
-using flight.Services.flight.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Net.Http.Headers;
-using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -41,15 +39,17 @@ builder.Services.AddIdentity<Users, IdentityRole>(options =>
 .AddEntityFrameworkStores<AppDbContext>()
 .AddDefaultTokenProviders();
 
-// Register PayMongoServiceConfiguration
-builder.Services.Configure<PayMongoServiceConfiguration>(builder.Configuration.GetSection("PayMongo"));
-
-// Register PayMongoService with HttpClient
-builder.Services.AddHttpClient<PayMongoService>((serviceProvider, client) =>
+// Register PaymongoService
+builder.Services.AddHttpClient<PaymongoService>(client =>
 {
-    var config = serviceProvider.GetRequiredService<PayMongoServiceConfiguration>();
     client.BaseAddress = new Uri("https://api.paymongo.com/");
-    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(Encoding.ASCII.GetBytes(config.SecretKey)));
+    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+});
+
+builder.Services.AddSingleton(provider =>
+{
+    var configuration = provider.GetRequiredService<IConfiguration>();
+    return new PaymongoService(provider.GetRequiredService<HttpClient>(), configuration["Paymongo:SecretKey"]);
 });
 
 var app = builder.Build();

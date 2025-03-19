@@ -65,5 +65,7 @@ namespace flight.Models
 
         [Required]
         public string Status { get; set; } = "Scheduled"; // Flight status (Scheduled, Delayed, Cancelled)
+
+        public List<Booking> Bookings { get; set; } = new List<Booking>();
     }
 }

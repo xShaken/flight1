@@ -1,0 +1,33 @@
+﻿@model IEnumerable<dynamic>
+
+<div class="modal-body">
+    <h5>Seat Availability</h5>
+    <ul>
+        <li>Economy Seats Left: @ViewBag.SeatAvailability.EconomySeatsAvailable</li>
+        <li>Business Seats Left: @ViewBag.SeatAvailability.BusinessSeatsAvailable</li>
+        <li>First Class Seats Left: @ViewBag.SeatAvailability.FirstClassSeatsAvailable</li>
+    </ul>
+
+    <h5>Guests</h5>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>First Name</th>
+                <th>Last Name</th>
+               
+                <th>Seat Class</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var guest in Model)
+            {
+                <tr>
+                    <td>@guest.FirstName</td>
+                    <td>@guest.LastName</td>
+            
+                    <td>@guest.SeatClass</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

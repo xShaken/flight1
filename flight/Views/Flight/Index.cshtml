@@ -43,7 +43,7 @@
                             int count = 1;
                             @foreach (var flight in Model)
                             {
-                                <tr>
+                                <tr data-flight-id="@flight.Id">
                                     <td>@count</td>
                                     <td>@flight.FlightNumber</td>
                                     <td>@flight.Airline?.Name</td>
@@ -201,6 +201,24 @@
     </div>
 </div>
 
+<!-- Guests Modal -->
+<div class="modal fade" id="guestsModal" tabindex="-1" aria-labelledby="guestsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="guestsModalLabel">Guests List</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="guestsModalBody">
+                <!-- Guests will be loaded here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
     <script>
@@ -257,7 +275,10 @@
         // Edit button functionality
         document.addEventListener("DOMContentLoaded", function () {
             document.querySelectorAll(".edit-flight-btn").forEach(button => {
-                button.addEventListener("click", function () {
+                button.addEventListener("click", function (e) {
+                    // Stop event propagation to prevent row click event
+                    e.stopPropagation();
+
                     document.querySelector("#editFlightId").value = this.getAttribute("data-id") || "";
                     document.querySelector("#editFlightNumber").value = this.getAttribute("data-flightnumber") || "";
                     document.querySelector("#editAircraftCode").value = this.getAttribute("data-aircraftcode") || "";
@@ -277,55 +298,18 @@
             });
         });
 
-        // Validation for Edit Modal
-        function validateEditForm() {
-            // Validate seats (must be whole numbers)
-            const businessSeats = document.querySelector('#editBusinessSeats');
-            const economySeats = document.querySelector('#editEconomySeats');
-            const firstClassSeats = document.querySelector('#editFirstClassSeats');
+        // Make rows clickable to show guests
+        document.addEventListener("DOMContentLoaded", function () {
+            document.querySelectorAll("#flightTable tbody tr").forEach(row => {
+                row.addEventListener("click", function () {
+                    const flightId = this.getAttribute("data-flight-id");
 
-            if (!Number.isInteger(parseFloat(businessSeats.value))) {
-                alert("Business Class Seats must be a whole number.");
-                return false;
-            }
-            if (!Number.isInteger(parseFloat(economySeats.value))) {
-                alert("Economy Class Seats must be a whole number.");
-                return false;
-            }
-            if (!Number.isInteger(parseFloat(firstClassSeats.value))) {
-                alert("First Class Seats must be a whole number.");
-                return false;
-            }
-
-            // Validate prices (cannot be negative)
-            const businessPrice = document.querySelector('#editBusinessPrice');
-            const economyPrice = document.querySelector('#editEconomyPrice');
-            const firstClassPrice = document.querySelector('#editFirstClassPrice');
-
-            if (businessPrice.value < 0 || economyPrice.value < 0 || firstClassPrice.value < 0) {
-                alert("Prices cannot be negative.");
-                return false;
-            }
-
-            // Validate airports (cannot be the same)
-            const departureAirport = document.querySelector('#editDepartureAirportId').value;
-            const arrivalAirport = document.querySelector('#editArrivalAirportId').value;
-
-            if (departureAirport === arrivalAirport) {
-                alert("Departure and Arrival airports cannot be the same.");
-                return false;
-            }
-
-            // Validate departure and arrival date & time (cannot be the same)
-            const departureDateTime = document.querySelector('#editDepartureDateTime').value;
-            const arrivalDateTime = document.querySelector('#editArrivalDateTime').value;
-
-            if (departureDateTime === arrivalDateTime) {
-                alert("Departure and Arrival date & time cannot be the same.");
-                return false;
-            }
-
-            return true; // Allow form submission
-        }
+                    // Load guests into the modal
+                    $('#guestsModalBody').load('/Flight/GetGuestsByFlight?flightId=' + flightId, function () {
+                        $('#guestsModal').modal('show');
+                    });
+                });
+            });
+        });
     </script>
 }

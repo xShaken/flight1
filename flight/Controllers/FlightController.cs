@@ -42,6 +42,43 @@ namespace flight.Controllers
             return View(flights);
         }
 
+        [HttpGet]
+        public async Task<IActionResult> GetGuestsByFlight(int flightId)
+        {
+            var flight = await _context.Flights
+                .Include(f => f.Bookings)
+                    .ThenInclude(b => b.Guests)
+                .FirstOrDefaultAsync(f => f.Id == flightId);
+
+            if (flight == null)
+            {
+                return NotFound();
+            }
+
+            var guests = flight.Bookings
+                .Where(b => b.Status == "Confirmed")
+                .SelectMany(b => b.Guests.Select(g => new
+                {
+                    g.FirstName,
+                    g.LastName,
+                    
+                    SeatClass = b.SeatClass
+                }))
+                .ToList();
+
+            var seatAvailability = new
+            {
+                EconomySeatsAvailable = flight.EconomySeatsAvailable,
+                BusinessSeatsAvailable = flight.BusinessSeatsAvailable,
+                FirstClassSeatsAvailable = flight.FirstClassSeatsAvailable
+            };
+
+            ViewBag.SeatAvailability = seatAvailability;
+
+            return PartialView("_GuestsPartial", guests);
+        }
+
+
         // Show the create flight form
         public async Task<IActionResult> Create()
         {

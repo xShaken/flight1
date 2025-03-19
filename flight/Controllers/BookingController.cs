@@ -43,6 +43,7 @@ namespace flight.Controllers
                 // Fetch the booking from the database
                 var booking = await _context.Bookings
                     .Include(b => b.Flight)
+                    .Include(b => b.ReturnFlight)
                     .Include(b => b.Payment) // Include Payment to check if it exists
                     .FirstOrDefaultAsync(b => b.Id == bookingId);
 
@@ -85,6 +86,50 @@ namespace flight.Controllers
 
                 // Update booking status to confirmed
                 booking.Status = "Confirmed";
+
+                // Deduct seats only if the booking is confirmed
+                if (booking.Status == "Confirmed")
+                {
+                    int totalGuests = booking.NumberOfAdults + booking.NumberOfChildren;
+
+                    // Deduct seats for the departure flight
+                    var departureFlight = booking.Flight;
+                    if (departureFlight != null)
+                    {
+                        switch (booking.SeatClass)
+                        {
+                            case "Economy":
+                                departureFlight.EconomySeatsAvailable -= totalGuests;
+                                break;
+                            case "Business":
+                                departureFlight.BusinessSeatsAvailable -= totalGuests;
+                                break;
+                            case "FirstClass":
+                                departureFlight.FirstClassSeatsAvailable -= totalGuests;
+                                break;
+                        }
+                        _context.Flights.Update(departureFlight);
+                    }
+
+                    // Deduct seats for the return flight if it exists
+                    var returnFlight = booking.ReturnFlight;
+                    if (returnFlight != null)
+                    {
+                        switch (booking.SeatClass)
+                        {
+                            case "Economy":
+                                returnFlight.EconomySeatsAvailable -= totalGuests;
+                                break;
+                            case "Business":
+                                returnFlight.BusinessSeatsAvailable -= totalGuests;
+                                break;
+                            case "FirstClass":
+                                returnFlight.FirstClassSeatsAvailable -= totalGuests;
+                                break;
+                        }
+                        _context.Flights.Update(returnFlight);
+                    }
+                }
 
                 // Save changes to the database
                 await _context.SaveChangesAsync();
