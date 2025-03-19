@@ -7,6 +7,7 @@ namespace flight.ViewModels
         [Required(ErrorMessage = "Email is required")]
         [EmailAddress]
         public string Email { get; set; }
-       
+        public string RecaptchaResponse { get; set; }
+
     }
 }

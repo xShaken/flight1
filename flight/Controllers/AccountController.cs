@@ -1,5 +1,5 @@
-﻿
-using flight.Models;
+﻿using flight.Models;
+using flight.Services;
 using flight.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -12,13 +12,16 @@ namespace flight.Controllers
         private readonly SignInManager<Users> signInManager;
         private readonly UserManager<Users> userManager;
         private readonly RoleManager<IdentityRole> roleManager;
+        private readonly ReCaptchaService reCaptchaService;
 
-        public AccountController(SignInManager<Users> signInManager, UserManager<Users> userManager, RoleManager<IdentityRole> roleManager)
+        public AccountController(SignInManager<Users> signInManager, UserManager<Users> userManager, RoleManager<IdentityRole> roleManager, ReCaptchaService reCaptchaService)
         {
             this.signInManager = signInManager;
             this.userManager = userManager;
             this.roleManager = roleManager;
+            this.reCaptchaService = reCaptchaService;
         }
+
         [HttpGet]
         public IActionResult Login()
         {
@@ -34,6 +37,14 @@ namespace flight.Controllers
                 return View(model);
             }
 
+            // Verify reCAPTCHA
+            var isReCaptchaValid = await reCaptchaService.VerifyReCaptcha(model.RecaptchaResponse);
+            if (!isReCaptchaValid)
+            {
+                ModelState.AddModelError("", "reCAPTCHA verification failed. Please try again.");
+                return View(model);
+            }
+
             var result = await signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, false);
             if (result.Succeeded)
             {
@@ -45,15 +56,10 @@ namespace flight.Controllers
                     {
                         return RedirectToAction("Dashboard", "Home"); // Redirect Admin to Admin View
                     }
-
-                    //redirect to the homecontroller
-
                     else if (await userManager.IsInRoleAsync(user, "User"))
                     {
-                        return RedirectToAction("User", "Home"); // ✅ This will redirect users to Views/Users/Index.cshtml
+                        return RedirectToAction("User", "Home"); // Redirect users to User view
                     }
-
-
                 }
             }
             ModelState.AddModelError("", "Invalid Login Attempt");
@@ -74,6 +80,15 @@ namespace flight.Controllers
             {
                 return View(model);
             }
+
+            // Verify reCAPTCHA
+            var isReCaptchaValid = await reCaptchaService.VerifyReCaptcha(model.RecaptchaResponse);
+            if (!isReCaptchaValid)
+            {
+                ModelState.AddModelError("", "reCAPTCHA verification failed. Please try again.");
+                return View(model);
+            }
+
             var user = new Users
             {
                 FullName = model.Name,
@@ -89,7 +104,7 @@ namespace flight.Controllers
                 var roleExists = await roleManager.RoleExistsAsync("User");
                 if (!roleExists)
                 {
-                   var role = new IdentityRole("User");
+                    var role = new IdentityRole("User");
                     await roleManager.CreateAsync(role);
                 }
                 await userManager.AddToRoleAsync(user, "User");
@@ -103,21 +118,30 @@ namespace flight.Controllers
             }
             return View(model);
         }
-        [HttpGet]
 
+        [HttpGet]
         public IActionResult VerifyEmail()
         {
             return View();
         }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
-        
         public async Task<IActionResult> VerifyEmail(VerifyEmailViewModel model)
         {
             if (!ModelState.IsValid)
             {
                 return View(model);
             }
+
+            // Verify reCAPTCHA
+            var isReCaptchaValid = await reCaptchaService.VerifyReCaptcha(model.RecaptchaResponse);
+            if (!isReCaptchaValid)
+            {
+                ModelState.AddModelError("", "reCAPTCHA verification failed. Please try again.");
+                return View(model);
+            }
+
             var user = await userManager.FindByEmailAsync(model.Email);
             if (user == null)
             {
@@ -126,20 +150,22 @@ namespace flight.Controllers
             }
             else
             {
-                return RedirectToAction("ChangePassword", "Account", new {username = user.UserName});
+                return RedirectToAction("ChangePassword", "Account", new { username = user.UserName });
             }
-          
         }
+
         [HttpGet]
         public IActionResult ChangePassword(string username)
         {
-            if(string.IsNullOrEmpty(username))
+            if (string.IsNullOrEmpty(username))
             {
                 return RedirectToAction("VerifyEmail", "Account");
             }
-            return View(new ChangePasswordViewModel { Email = username});
+            return View(new ChangePasswordViewModel { Email = username });
         }
+
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
         {
             if (!ModelState.IsValid)
@@ -147,6 +173,15 @@ namespace flight.Controllers
                 ModelState.AddModelError("", "Something went wrong");
                 return View(model);
             }
+
+            // Verify reCAPTCHA
+            var isReCaptchaValid = await reCaptchaService.VerifyReCaptcha(model.RecaptchaResponse);
+            if (!isReCaptchaValid)
+            {
+                ModelState.AddModelError("", "reCAPTCHA verification failed. Please try again.");
+                return View(model);
+            }
+
             var user = await userManager.FindByEmailAsync(model.Email);
 
             if (user == null)
@@ -154,7 +189,8 @@ namespace flight.Controllers
                 ModelState.AddModelError("", "User not found!");
                 return View(model);
             }
-           var result = await userManager.RemovePasswordAsync(user);
+
+            var result = await userManager.RemovePasswordAsync(user);
             if (result.Succeeded)
             {
                 result = await userManager.AddPasswordAsync(user, model.NewPassword);
@@ -166,11 +202,9 @@ namespace flight.Controllers
                 {
                     ModelState.AddModelError("", error.Description);
                 }
-              return View(model);
+                return View(model);
             }
-
-           }
-
+        }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -178,6 +212,6 @@ namespace flight.Controllers
         {
             await signInManager.SignOutAsync();
             return RedirectToAction("Landingpage", "Home");
-        } 
+        }
     }
 }

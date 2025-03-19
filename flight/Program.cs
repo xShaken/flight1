@@ -9,6 +9,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+//Recaptcha
+builder.Services.AddHttpClient<ReCaptchaService>();
 
 // Configure CORS
 builder.Services.AddCors(options =>
