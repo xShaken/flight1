@@ -420,6 +420,13 @@ html, body {
         background-color: #138496;
     }
 
+.ticket-navigation,
+.ticket-buttons {
+    display: flex;
+    gap: 10px; /* Adds gaps between buttons */
+    margin-top: 20px; /* Adds space above the buttons */
+    justify-content: center; /* Centers the buttons horizontally */
+}
 
 /* === RESPONSIVE TABLE === */
 @media (max-width: 992px) {
