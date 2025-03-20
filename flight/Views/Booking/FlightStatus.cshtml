@@ -31,6 +31,16 @@
                 <div class="status arrived">Arrived</div>
                 <div class="plane-icon" style="left: 100%;"></div>
             }
+            else if (Model.Status == "Delayed")
+            {
+                <div class="status delayed">Delayed</div>
+                <div class="plane-icon" style="left: 25%;"></div>
+            }
+            else if (Model.Status == "Cancelled")
+            {
+                <div class="status cancelled">Cancelled</div>
+                <div class="plane-icon" style="left: 0%;"></div>
+            }
             else
             {
                 <div class="status scheduled">Scheduled</div>
@@ -62,6 +72,16 @@
                 {
                     <div class="status arrived">Arrived</div>
                     <div class="plane-icon" style="left: 100%;"></div>
+                }
+                else if (ViewBag.ReturnFlight.Status == "Delayed")
+                {
+                    <div class="status delayed">Delayed</div>
+                    <div class="plane-icon" style="left: 25%;"></div>
+                }
+                else if (ViewBag.ReturnFlight.Status == "Cancelled")
+                {
+                    <div class="status cancelled">Cancelled</div>
+                    <div class="plane-icon" style="left: 0%;"></div>
                 }
                 else
                 {
@@ -117,6 +137,18 @@
         .status.arrived {
             background-color: #2196F3;
             right: 10px;
+        }
+
+        .status.delayed {
+            background-color: #FFEB3B;
+            color: #000;
+            left: 25%;
+            transform: translate(-50%, -50%);
+        }
+
+        .status.cancelled {
+            background-color: #F44336;
+            left: 10px;
         }
 
     .plane-icon {

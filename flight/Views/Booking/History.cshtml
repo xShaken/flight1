@@ -7,6 +7,11 @@
 <div class="container">
     <h2 class="mb-4">Booking History</h2>
 
+    <!-- Search Bar -->
+    <div class="mb-4">
+        <input type="text" id="searchInput" class="form-control" placeholder="Search by Booking ID, Flight Number, or Passenger Name..." aria-label="Search">
+    </div>
+
     @if (!Model.Any())
     {
         <div class="alert alert-info">
@@ -16,10 +21,11 @@
     else
     {
         <div class="table-responsive">
-            <table class="table table-hover table-striped table-bordered">
+            <table class="table table-hover table-striped table-bordered" id="bookingTable">
                 <thead class="thead-dark">
                     <tr>
                         <th>Booking ID</th>
+                        <th>Flight Number</th>
                         <th>Departure</th>
                         <th>Arrival</th>
                         <th>Date</th>
@@ -35,6 +41,7 @@
                     {
                         <tr>
                             <td class="align-middle">@booking.Id</td>
+                            <td class="align-middle">@booking.Flight.FlightNumber</td>
                             <td class="align-middle">
                                 <div class="flight-details">
                                     <strong>From:</strong> @booking.Flight.DepartureAirport.Name<br />
@@ -57,7 +64,7 @@
                                 }
                             </td>
                             <td class="align-middle">@booking.Flight.DepartureDateTime.ToShortDateString()</td>
-                            <td class="align-middle">@booking.SeatClass</td>
+                            <td class="align-middle class-column">@booking.SeatClass</td>
                             <td class="align-middle">
                                 <ul class="list-unstyled mb-0">
                                     @foreach (var guest in booking.Guests)
@@ -66,11 +73,10 @@
                                     }
                                 </ul>
                             </td>
-                            <td class="align-middle">
+                            <td class="align-middle payment-status">
                                 @if (booking.Payment != null)
                                 {
                                     <span class="badge bg-success">@booking.Payment.Status</span>
-
                                     <br />
                                     <small>@booking.Payment.PaymentDate.ToShortDateString()</small>
                                 }
@@ -79,12 +85,12 @@
                                     <span class="badge bg-warning">Pending</span>
                                 }
                             </td>
-                            <td class="align-middle">₱@booking.TotalPrice.ToString("N2")</td>
+                            <td class="align-middle total-price">₱@booking.TotalPrice.ToString("N2")</td>
                             <td class="align-middle">
                                 @if (booking.Status == "Confirmed")
                                 {
-                                    <a href="/Booking/Ticket/@booking.Id" class="btn btn-primary btn-sm">View Ticket</a>
-                                    <a href="/Booking/FlightStatus/@booking.Flight.Id" class="btn btn-info btn-sm">View Flight Status</a>
+                                    <a href="/Booking/Ticket/@booking.Id" class="btn btn-view-ticket">View Ticket</a>
+                                    <a href="/Booking/FlightStatus/@booking.Flight.Id" class="btn btn-view-status">View Flight Status</a>
                                 }
                             </td>
                         </tr>
@@ -94,3 +100,18 @@
         </div>
     }
 </div>
+
+<!-- Add jQuery for Search Functionality -->
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $("#searchInput").on("keyup", function () {
+                var value = $(this).val().toLowerCase();
+                $("#bookingTable tbody tr").filter(function () {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
+                });
+            });
+        });
+    </script>
+}

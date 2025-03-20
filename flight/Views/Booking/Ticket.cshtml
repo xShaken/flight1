@@ -8,6 +8,11 @@
     var isReturn = ViewBag.IsReturn ?? false; // Default to false if null
     var totalGuests = ViewBag.TotalGuests ?? 0; // Default to 0 if null
     var bookingId = ViewBag.BookingId ?? 0; // Default to 0 if null
+
+    // Generate a unique seat for each guest
+    var seatRow = guestIndex + 1; // Start seat rows from 1
+    var seatLetter = (char)('A' + (guestIndex % 6)); // Cycle through A-F for seat letters
+    var seatNumber = $"{seatRow}{seatLetter}"; // Combine row and letter for seat number
 }
 
 @if (flight == null || guest == null)
@@ -84,11 +89,11 @@ else
                     <span class="name">PASSENGER NAME<br><span>@guest.FirstName @guest.LastName</span></span>
                     <span class="flight">FLIGHT N&deg;<br><span>@flight.FlightNumber</span></span>
                     <span class="gate">GATE<br><span>A-6</span></span>
-                    <span class="seat">SEAT<br><span>9A</span></span>
+                    <span class="seat">SEAT<br><span>@seatNumber</span></span>
                     <span class="boardingtime">BOARDING TIME<br><span>@flight.DepartureDateTime.ToString("hh:mm tt") ON @flight.DepartureDateTime.ToString("MMMM yyyy")</span></span>
 
                     <span class="flight flightslip">FLIGHT N&deg;<br><span>@flight.FlightNumber</span></span>
-                    <span class="seat seatslip">SEAT<br><span>9A</span></span>
+                    <span class="seat seatslip">SEAT<br><span>@seatNumber</span></span>
                     <span class="name nameslip">PASSENGER NAME<br><span>@guest.FirstName @guest.LastName</span></span>
                 </div>
             </div>

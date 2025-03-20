@@ -13,13 +13,23 @@ namespace flight.Controllers
         private readonly UserManager<Users> userManager;
         private readonly RoleManager<IdentityRole> roleManager;
         private readonly ReCaptchaService reCaptchaService;
+        private readonly LoginAttemptTracker loginAttemptTracker;
+        private readonly ILogger<AccountController> logger;
 
-        public AccountController(SignInManager<Users> signInManager, UserManager<Users> userManager, RoleManager<IdentityRole> roleManager, ReCaptchaService reCaptchaService)
+        public AccountController(
+            SignInManager<Users> signInManager,
+            UserManager<Users> userManager,
+            RoleManager<IdentityRole> roleManager,
+            ReCaptchaService reCaptchaService,
+            LoginAttemptTracker loginAttemptTracker,
+            ILogger<AccountController> logger)
         {
             this.signInManager = signInManager;
             this.userManager = userManager;
             this.roleManager = roleManager;
             this.reCaptchaService = reCaptchaService;
+            this.loginAttemptTracker = loginAttemptTracker;
+            this.logger = logger;
         }
 
         [HttpGet]
@@ -37,6 +47,16 @@ namespace flight.Controllers
                 return View(model);
             }
 
+            // Get the client's IP address
+            var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
+
+            // Check if the IP is blocked
+            if (loginAttemptTracker.IsIPBlocked(ipAddress))
+            {
+                ModelState.AddModelError("", "Too many failed attempts. Please try again later.");
+                return View(model);
+            }
+
             // Verify reCAPTCHA
             var isReCaptchaValid = await reCaptchaService.VerifyReCaptcha(model.RecaptchaResponse);
             if (!isReCaptchaValid)
@@ -45,26 +65,67 @@ namespace flight.Controllers
                 return View(model);
             }
 
-            var result = await signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, false);
+            // Check if user exists before attempting to sign in
+            var user = await userManager.FindByEmailAsync(model.Email);
+            if (user != null && await userManager.IsLockedOutAsync(user))
+            {
+                // Calculate remaining lockout time
+                var lockoutEnd = await userManager.GetLockoutEndDateAsync(user);
+                var remainingTime = lockoutEnd.HasValue ?
+                    lockoutEnd.Value.Subtract(DateTimeOffset.UtcNow) :
+                    TimeSpan.Zero;
+
+                if (remainingTime > TimeSpan.Zero)
+                {
+                    ModelState.AddModelError("", $"Your account is locked. Please try again in {(int)remainingTime.TotalMinutes} minutes.");
+                    return View(model);
+                }
+            }
+
+            // Introduce a delay for repeated failed attempts
+            var delaySeconds = loginAttemptTracker.GetDelaySeconds(ipAddress);
+            if (delaySeconds > 0)
+            {
+                await Task.Delay(TimeSpan.FromSeconds(delaySeconds));
+            }
+
+            // Changed from false to true to enable lockout
+            var result = await signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, true);
+
             if (result.Succeeded)
             {
-                var user = await userManager.FindByEmailAsync(model.Email);
-
-                if (user != null) // Checking if the user exists
+                // Reset lockout count on successful login
+                if (user != null)
                 {
+                    await userManager.ResetAccessFailedCountAsync(user);
+                    loginAttemptTracker.ResetAttempts(ipAddress); // Reset IP attempt tracker
+
                     if (await userManager.IsInRoleAsync(user, "Admin"))
                     {
-                        return RedirectToAction("Dashboard", "Home"); // Redirect Admin to Admin View
+                        return RedirectToAction("Dashboard", "Home");
                     }
                     else if (await userManager.IsInRoleAsync(user, "User"))
                     {
-                        return RedirectToAction("User", "Home"); // Redirect users to User view
+                        return RedirectToAction("User", "Home");
                     }
                 }
+                return RedirectToAction("Index", "Home");
             }
-            ModelState.AddModelError("", "Invalid Login Attempt");
+
+            if (result.IsLockedOut)
+            {
+                ModelState.AddModelError("", "Account locked due to too many failed attempts. Please try again later.");
+            }
+            else
+            {
+                // Record failed attempt
+                loginAttemptTracker.RecordAttempt(ipAddress);
+                ModelState.AddModelError("", "Invalid Login Attempt");
+            }
+
             return View(model);
         }
+
 
         [HttpGet]
         public IActionResult Register()
