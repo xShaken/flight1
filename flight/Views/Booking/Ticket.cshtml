@@ -13,6 +13,9 @@
     var seatRow = guestIndex + 1; // Start seat rows from 1
     var seatLetter = (char)('A' + (guestIndex % 6)); // Cycle through A-F for seat letters
     var seatNumber = $"{seatRow}{seatLetter}"; // Combine row and letter for seat number
+
+    // Check if the flight has departed or arrived
+    bool isFlightDepartedOrArrived = flight != null && (flight.Status == "Departed" || flight.Status == "Arrived");
 }
 
 @if (flight == null || guest == null)
@@ -121,7 +124,7 @@ else
 
         <!-- Add buttons here -->
         <div class="ticket-buttons">
-            <button id="cancelTicket" class="btn btn-danger">Cancel Ticket</button>
+            <button id="cancelTicket" class="btn btn-danger" @(isFlightDepartedOrArrived ? "disabled" : "")>Cancel Ticket</button>
             <button id="downloadTicket" class="btn btn-primary">Download Ticket</button>
         </div>
     </div>
@@ -141,7 +144,9 @@ else
                         alert('Ticket cancelled successfully.');
                         window.location.href = '/Booking/History';
                     } else {
-                        alert('Failed to cancel ticket.');
+                        response.text().then(message => {
+                            alert(message || 'Failed to cancel ticket.');
+                        });
                     }
                 });
             }

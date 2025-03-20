@@ -426,6 +426,18 @@ namespace flight.Controllers
                 return NotFound();
             }
 
+            // Check if the departure flight has already departed or arrived
+            if (booking.Flight != null && (booking.Flight.Status == "Departed" || booking.Flight.Status == "Arrived"))
+            {
+                return BadRequest("Cannot cancel ticket: The flight has already departed or arrived.");
+            }
+
+            // Check if the return flight has already departed or arrived (if applicable)
+            if (booking.ReturnFlight != null && (booking.ReturnFlight.Status == "Departed" || booking.ReturnFlight.Status == "Arrived"))
+            {
+                return BadRequest("Cannot cancel ticket: The return flight has already departed or arrived.");
+            }
+
             int totalGuests = booking.NumberOfAdults + booking.NumberOfChildren;
 
             // Return seats for the departure flight
